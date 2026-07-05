@@ -1,0 +1,1 @@
+te=i!=null?Xd.jsx(__CodexCapyOnsenModalProviderV4,{rows:S,columns:Math.max(1,__coCenterColumns(T,0)-2*$be),scrollRef:a??null,children:Xd.jsx(B,{flexDirection:"column",marginLeft:__coW,width:__coCenterColumns(T,0),paddingX:$be,children:i})}):null

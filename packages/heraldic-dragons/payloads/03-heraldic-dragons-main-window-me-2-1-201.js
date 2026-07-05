@@ -1,0 +1,1 @@
+me=Xd.jsx(__CodexHeraldicMainWindowV4,{children:Xd.jsxs(B,{flexGrow:1,flexDirection:"row",overflow:"hidden",children:[Ee,pe]})},"codex-heraldic-v12-main-window")

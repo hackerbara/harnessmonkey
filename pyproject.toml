@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "harnessmonkey"
+version = "0.1.0"
+description = "Source-first local userscript-style customization manager for Claude Code"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "PySide6>=6.7",
+  "pyobjc-framework-Cocoa>=10.0 ; sys_platform == 'darwin'",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2",
+  "pytest-qt>=4.4",
+  "ruff>=0.5",
+  "Pillow>=10.0"
+]
+
+[project.scripts]
+harnessmonkey = "harnessmonkey.cli:main"
+harnessmonkey-gui = "harnessmonkey.gui.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"harnessmonkey.gui" = ["assets/*.png"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+  "local_real_smoke: opt-in tests that copy and smoke-test the locally installed Claude binary"
+]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

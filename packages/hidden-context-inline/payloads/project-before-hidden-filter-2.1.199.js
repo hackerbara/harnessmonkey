@@ -1,0 +1,1 @@
+let Jt=r||zs()?Se:Bg(Se,{includeFolded:!0});Jt=__codexNCHCProjectList(Jt);let be=src(Jt.filter((cr)=>cr.type!=="progress").filter((cr)=>!Jur(cr)).filter((cr)=>crc(cr,le)),ue)

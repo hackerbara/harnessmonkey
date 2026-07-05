@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "kind": "patch",
+  "id": "hidden-context-drawer",
+  "label": "Hidden Context Drawer",
+  "description": "Hidden Context drawer content seam plus panel for real footer target wiring in Claude Code 2.1.201.",
+  "packageVersion": "2.1.201-real-target.1",
+  "compatibility": {
+    "claudeVersions": [
+      "2.1.201"
+    ]
+  },
+  "patch": {
+    "engine": "bun_graph_repack",
+    "targets": [
+      {
+        "sourceIdentity": {
+          "claudeVersion": "2.1.201",
+          "versionOutput": "2.1.201 (Claude Code)",
+          "sha256": "a0852d76afc47b30f5cb0b7625ec9a7714cb189f2eeef6c28c77e2be954fb7fd",
+          "sizeBytes": 231708784,
+          "platform": "darwin",
+          "arch": "arm64"
+        },
+        "requiredEngine": "bun_graph_repack",
+        "requiredBinaryFormat": "bun_standalone_macho64",
+        "modules": [
+          {
+            "path": "/$bunfs/root/src/entrypoints/cli.js",
+            "contentSha256": "46db617a7b13c062fb31595f6244819b11f7cdc6e6fed8e2c3f74a27fb6da1bd",
+            "contentLength": 18700756,
+            "operations": [
+              {
+                "opId": "projection-helpers-before-ypr",
+                "label": "Insert Hidden Context projection helpers before 2.1.201 hidden-filter function",
+                "type": "insert_before",
+                "anchor": "function Ypr(e){",
+                "expectedAnchorCount": 1,
+                "insertOrder": 100,
+                "replacement": {
+                  "path": "payloads/01-projection-helpers-before-ypr-2.1.201.js",
+                  "sha256": "bce39c0f93ad2fd25e947b483137011a5aed408f5981093d7b9b0d6d716d9328"
+                },
+                "knownBehaviorChange": "Publishes full projection-list drawer frame before hidden-context filtering without framework registry mutation."
+              },
+              {
+                "opId": "yt-projection-list-drawer-frame",
+                "label": "Capture full projection list before hidden filtering",
+                "type": "replace_exact",
+                "exact": "let Fn=r||Ys()?Ee:qg(Ee,{includeFolded:!0}),_e=Klc(Fn.filter((_r)=>_r.type!==\"progress\").filter((_r)=>!Ypr(_r)).filter((_r)=>Xlc(_r,de)),ue)",
+                "requireWithinRange": [],
+                "oldRangeSha256": "31ab75b0986fb742f91ba955cbf1db5374899dcdf0ea4a99a57268d9009511f1",
+                "oldRangeLength": 140,
+                "replacement": {
+                  "path": "payloads/02-yt-projection-list-drawer-frame.js",
+                  "sha256": "9e847eefb24897de75b8636448c505165a787a795d2babe7dc5a6039a50d75af"
+                },
+                "knownBehaviorChange": "Stores drawer frame data from the full projection list before Ypr hidden attachment filtering."
+              },
+              {
+                "opId": "hidden-context-panel-real-target",
+                "label": "Provide Hidden Context panel for the real footer target overlay",
+                "type": "insert_before",
+                "anchor": "var MXe,A_,Xd,GKo=2,pmr;",
+                "expectedAnchorCount": 1,
+                "insertOrder": 100,
+                "replacement": {
+                  "path": "payloads/17-panel-real-target.js",
+                  "sha256": "a8f4cc08c7c89d3124f3136a3880f7af0a63c5e7c0e24331cac4451ae5e6d5d0"
+                },
+                "knownBehaviorChange": "Renders Hidden Context only when the real hiddenContext target is selected and locally open."
+              }
+            ]
+          }
+        ],
+        "preconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "let Fn=r||Ys()?Ee:qg(Ee,{includeFolded:!0}),_e=Klc(Fn.filter((_r)=>_r.type!==\"progress\").filter((_r)=>!Ypr(_r)).filter((_r)=>Xlc(_r,de)),ue)"
+          }
+        ],
+        "postconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__CODEX_HIDDEN_CONTEXT_DRAWER_FRAME_V13__"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexNCHCPanel"
+          }
+        ],
+        "manualSmoke": {
+          "required": true,
+          "reason": "Hidden Context drawer UI requires interactive footer/overlay smoke."
+        }
+      }
+    ]
+  },
+  "requiresPackages": [
+    "drawer-dock"
+  ]
+}

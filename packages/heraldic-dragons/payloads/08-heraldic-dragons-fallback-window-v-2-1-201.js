@@ -1,0 +1,1 @@
+V=Xd.jsx(__CodexHeraldicFallbackWindowV4,{scrollable:n,bottom:s,modal:i},"codex-heraldic-v12-fallback-window")

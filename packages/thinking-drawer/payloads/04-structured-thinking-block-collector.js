@@ -1,0 +1,1 @@
+try{__codexTTDScanAssistantMessage(n)}catch(P){}k=n.message.content.map(I),t[23]=s,t[24]=a,t[25]=T,t[26]=R,t[27]=c,t[28]=f,t[29]=r,t[30]=n.advisorModel,t[31]=n.message.content,t[32]=n.message.id,t[33]=n.uuid,t[34]=h,t[35]=u,t[36]=d,t[37]=p,t[38]=i,t[39]=l,t[40]=k

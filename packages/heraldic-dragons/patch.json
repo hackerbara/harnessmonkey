@@ -1,0 +1,320 @@
+{
+  "schemaVersion": 1,
+  "kind": "patch",
+  "id": "heraldic-dragons",
+  "label": "Heraldic Dragons",
+  "description": "Two heraldic fire-breathing dragons flank the terminal \u2014 high-def half-block pixel art with 8-phase baked flame animation, drawn via the renderer's native ink-raw-ansi direct-draw path.",
+  "packageVersion": "1.2.2-footer-drawer-overlay-fix",
+  "compatibility": {
+    "claudeVersions": [
+      "2.1.201"
+    ]
+  },
+  "patch": {
+    "engine": "bun_graph_repack",
+    "targets": [
+      {
+        "sourceIdentity": {
+          "claudeVersion": "2.1.201",
+          "versionOutput": "2.1.201 (Claude Code)",
+          "sha256": "a0852d76afc47b30f5cb0b7625ec9a7714cb189f2eeef6c28c77e2be954fb7fd",
+          "sizeBytes": 231708784,
+          "platform": "darwin",
+          "arch": "arm64"
+        },
+        "requiredEngine": "bun_graph_repack",
+        "requiredBinaryFormat": "bun_standalone_macho64",
+        "modules": [
+          {
+            "path": "/$bunfs/root/src/entrypoints/cli.js",
+            "contentSha256": "46db617a7b13c062fb31595f6244819b11f7cdc6e6fed8e2c3f74a27fb6da1bd",
+            "contentLength": 18700756,
+            "operations": [
+              {
+                "opId": "heraldic-dragons-context-frame-helpers-before-vko-2-1-201",
+                "label": "Insert dragon art plus physical frame, fde center provider, and modal-only t4 before app shell VKo",
+                "type": "replace_exact",
+                "exact": "function VKo(e){let t=MXe.c(78)",
+                "requireWithinRange": [
+                  "function VKo(e){"
+                ],
+                "oldRangeSha256": "2a92f42d7facf44fc5d57fbbecf4355f7fe3aab84d17cde70db3e900f22b92a9",
+                "oldRangeLength": 31,
+                "replacement": {
+                  "path": "payloads/01-heraldic-dragons-context-frame-helpers-before-vko-2-1-201.js",
+                  "sha256": "d1543773bb4de3f540b23dd8434d09359a1c2d4249498e230977a0425c80e101"
+                },
+                "knownBehaviorChange": "Defines clipped 30-column visible dragon side gutters, responsive right-gutter collapse at <=140 columns, and a center-column fde/useTerminalSize provider while reserving t4 for real modal/scrollbox overlays."
+              },
+              {
+                "opId": "heraldic-dragons-center-columns-a-2-1-201",
+                "label": "Shrink VKo local column context by the dragon gutters",
+                "type": "replace_exact",
+                "exact": "A=Math.max(1,T-f)",
+                "requireWithinRange": [
+                  "A=Math.max(1,T-f)"
+                ],
+                "oldRangeSha256": "d74fab07ccf7cd2187c9174d54d74ce17ffd7ac470a3227067231313636e795b",
+                "oldRangeLength": 17,
+                "replacement": {
+                  "path": "payloads/02-heraldic-dragons-center-columns-a-2-1-201.js",
+                  "sha256": "f983e51d1a1f03afcbea26692f118cb990446dd611120b87d0a157c12219738a"
+                },
+                "knownBehaviorChange": "Makes VKo transcript context reserve the left dragon gutter, responsive right gutter, and any sidebar."
+              },
+              {
+                "opId": "heraldic-dragons-main-window-me-2-1-201",
+                "label": "Physically wrap the fullscreen main window row in dragon gutters (me)",
+                "type": "replace_exact",
+                "exact": "me=Xd.jsxs(B,{flexGrow:1,flexDirection:\"row\",overflow:\"hidden\",children:[Ee,pe]})",
+                "requireWithinRange": [
+                  "children:[Ee,pe]"
+                ],
+                "oldRangeSha256": "4acc36b5704224124c2d63876b022bed43bfbc8a4abf822d04683a57f08edd2b",
+                "oldRangeLength": 81,
+                "replacement": {
+                  "path": "payloads/03-heraldic-dragons-main-window-me-2-1-201.js",
+                  "sha256": "980d4adb0ce8cdcd321e5d43717b9429df20c8a5c98a0eed63e277d7ed76d42e"
+                },
+                "knownBehaviorChange": "Constrains the whole main window row between explicit dragon gutters and gives center children a narrowed fde context without putting normal content in modal/scrollbox t4."
+              },
+              {
+                "opId": "heraldic-dragons-bottom-stack-de-2-1-201",
+                "label": "Physically wrap fullscreen bottom chrome/prompt/footer stack in dragon gutters (de)",
+                "type": "replace_exact",
+                "exact": "de=Xd.jsxs(B,{flexDirection:\"column\",flexShrink:0,width:\"100%\",maxHeight:w,children:[Se,le,ue]})",
+                "requireWithinRange": [
+                  "children:[Se,le,ue]"
+                ],
+                "oldRangeSha256": "95a13d46acccd535c7335a84c96c4d39b43ea1ae065c9e361786ac8d836867cb",
+                "oldRangeLength": 96,
+                "replacement": {
+                  "path": "payloads/04-heraldic-dragons-bottom-stack-de-2-1-201.js",
+                  "sha256": "8f12ba57df0bbee51de24c62dec572d7e53557d721f96728d1233973ce6ad6a7"
+                },
+                "knownBehaviorChange": "Constrains prompt/footer/bottom overlays to the center width and narrowed fde context while leaving footer drawer overlays unclipped and rendering castle towers in the gutters."
+              },
+              {
+                "opId": "heraldic-dragons-fullscreen-modal-center-fe-2-1-201",
+                "label": "Physically and contextually constrain fullscreen modal overlay to the center column (fe)",
+                "type": "replace_exact",
+                "exact": "fe=i!=null&&Xd.jsx(t4,{value:{rows:S,columns:T-2*$be,scrollRef:a??null,claimScrollBox:null},children:Xd.jsxs(B,{position:\"absolute\",bottom:0,left:0,right:0,maxHeight:y-GKo,flexDirection:\"column\",overflow:\"hidden\",opaque:!0,children:[Xd.jsx(B,{flexShrink:0,children:Xd.jsx(HS,{color:\"permission\",char:\"\\u2594\"})}),Xd.jsx(Quf,{scrollRef:a,maxRows:S,children:i})]})})",
+                "requireWithinRange": [
+                  "position:\"absolute\",bottom:0,left:0,right:0"
+                ],
+                "oldRangeSha256": "29f640e7c075c961de97fc0f660ac4b790134d413630914678a9d73b9af3107b",
+                "oldRangeLength": 364,
+                "replacement": {
+                  "path": "payloads/05-heraldic-dragons-fullscreen-modal-center-fe-2-1-201.js",
+                  "sha256": "f0e5a3c5504990413675a6a093c935878ad05e941ebaea1e2f091fc8bc2e003b"
+                },
+                "knownBehaviorChange": "Keeps modal/sub-agent style overlays in an explicit center-width box and narrowed real modal t4 context."
+              },
+              {
+                "opId": "heraldic-dragons-qde-bottom-stack-ee-2-1-201",
+                "label": "Physically wrap QDe bottom chrome/prompt/footer stack in dragon gutters (ee)",
+                "type": "replace_exact",
+                "exact": "ee=Xd.jsxs(Xd.Fragment,{children:[J,Q,s]})",
+                "requireWithinRange": [
+                  "children:[J,Q,s]"
+                ],
+                "oldRangeSha256": "e347b14b9ce4e9dcee6cd89588ea43ef071b8d3081c9dff452cfdf4f418a2385",
+                "oldRangeLength": 42,
+                "replacement": {
+                  "path": "payloads/06-heraldic-dragons-qde-bottom-stack-ee-2-1-201.js",
+                  "sha256": "3180d24d4d6d6d915cb987db8ea5dc18cb84001f41e434fa9de0d06ffe7c707d"
+                },
+                "knownBehaviorChange": "Constrains the prompt/footer stack in the terminal-scroll-region path."
+              },
+              {
+                "opId": "heraldic-dragons-qde-overlay-center-te-2-1-201",
+                "label": "Physically and contextually constrain QDe overlay to the center column (te)",
+                "type": "replace_exact",
+                "exact": "te=i!=null?Xd.jsx(t4,{value:{rows:S,columns:T-2*$be,scrollRef:a??null,claimScrollBox:null},children:Xd.jsx(B,{flexDirection:\"column\",paddingX:$be,children:i})}):null",
+                "requireWithinRange": [
+                  "paddingX:$be,children:i"
+                ],
+                "oldRangeSha256": "f79a94b387af1ae974282da4c7ce71ca63cb075fac5096439d83dc4e54838201",
+                "oldRangeLength": 165,
+                "replacement": {
+                  "path": "payloads/07-heraldic-dragons-qde-overlay-center-te-2-1-201.js",
+                  "sha256": "8d4d23aaef1f874aabac74ed4b4a2e747292427c312332b28c87340030a310bc"
+                },
+                "knownBehaviorChange": "Keeps overlay contents out of gutters using an explicit center-width box and narrowed real modal t4 context."
+              },
+              {
+                "opId": "heraldic-dragons-fallback-window-v-2-1-201",
+                "label": "Physically wrap fallback scrollable/bottom/modal window in dragon gutters (V)",
+                "type": "replace_exact",
+                "exact": "V=Xd.jsxs(Xd.Fragment,{children:[n,s,i]})",
+                "requireWithinRange": [
+                  "children:[n,s,i]"
+                ],
+                "oldRangeSha256": "397dd8bd349d51ea7c16432ed32e0baf9a0e608c35eebed40b1ba86d5cdca542",
+                "oldRangeLength": 41,
+                "replacement": {
+                  "path": "payloads/08-heraldic-dragons-fallback-window-v-2-1-201.js",
+                  "sha256": "2ce70d3f2c7e7aa32da9e1128f1183a60a46d6c59f9a82a07190fb47a4b2ff4e"
+                },
+                "knownBehaviorChange": "Uses the same physical/contextual main and bottom frame in the non-fullscreen fallback path."
+              }
+            ]
+          }
+        ],
+        "preconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function VKo(e){let t=MXe.c(78)"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "A=Math.max(1,T-f)"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "me=Xd.jsxs(B,{flexGrow:1,flexDirection:\"row\",overflow:\"hidden\",children:[Ee,pe]})"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "de=Xd.jsxs(B,{flexDirection:\"column\",flexShrink:0,width:\"100%\",maxHeight:w,children:[Se,le,ue]})"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "fe=i!=null&&Xd.jsx(t4,{value:{rows:S,columns:T-2*$be,scrollRef:a??null,claimScrollBox:null},children:Xd.jsxs(B,{position:\"absolute\",bottom:0,left:0,right:0,maxHeight:y-GKo,flexDirection:\"column\",overflow:\"hidden\",opaque:!0,children:[Xd.jsx(B,{flexShrink:0,children:Xd.jsx(HS,{color:\"permission\",char:\"\\u2594\"})}),Xd.jsx(Quf,{scrollRef:a,maxRows:S,children:i})]})})"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "ee=Xd.jsxs(Xd.Fragment,{children:[J,Q,s]})"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "te=i!=null?Xd.jsx(t4,{value:{rows:S,columns:T-2*$be,scrollRef:a??null,claimScrollBox:null},children:Xd.jsx(B,{flexDirection:\"column\",paddingX:$be,children:i})}):null"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "V=Xd.jsxs(Xd.Fragment,{children:[n,s,i]})"
+          }
+        ],
+        "postconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __CodexHeraldicSpriteSceneV11"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __hdCenterProviderV4"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __CodexHeraldicMainWindowV4"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __CodexHeraldicBottomStackV4"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __hdRightWidthV6"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__hdResponsiveBreakpointV6=140"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "A=__hdCenterColumns(T,f)"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "codex-heraldic-v11-scene"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "codex-heraldic-v12-main-window"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "codex-heraldic-v12-bottom-stack"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "codex-heraldic-v12-right-responsive"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "codex-heraldic-v12-tower-right-responsive"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "a=n!==void 0||r!==void 0,l=a?Xd.jsx(t4,{value:i,children:o}):o"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "Xd.jsx(fde,{value:s,children:Xd.jsx(t4,{value:i,children:o})})"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "s=A_.useMemo(()=>({rows:e,columns:t}),[e,t])"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "\"ink-raw-ansi\""
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "String.fromCharCode(9600)"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "\u2580"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__hdClipColsV7=2"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__hdW=__hdArtW-__hdClipColsV7"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __hdCropRunsV7"
+          }
+        ],
+        "manualSmoke": {
+          "required": true,
+          "reason": "Purely visual TUI art plus global center-column context wrapping. Correct rendering, animation, main transcript, prompt/footer/modal containment, and resize behavior must be confirmed interactively in a truecolor terminal."
+        }
+      }
+    ]
+  }
+}

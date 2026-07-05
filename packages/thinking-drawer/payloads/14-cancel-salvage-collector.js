@@ -1,0 +1,1 @@
+let en=_t?.thinking?.trim();if(en&&WAe().thinkingStartedAt!==null){try{__codexTTDRecordSalvagedThinking({thinking:en,turnKey:M9.current,requestId:M9.current})}catch(_s){}kc((_s)=>[..._s,zT({content:[{type:"thinking",thinking:en,signature:""}],isVirtual:!0})]);}

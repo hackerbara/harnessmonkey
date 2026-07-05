@@ -1,0 +1,1 @@
+k=Tt((Me)=>!1),FDhSel=Tt((Me)=>Me.footerSelection==="hiddenContext"),FDtSel=Tt((Me)=>Me.footerSelection==="thinking"),FDrSel=Tt((Me)=>Me.footerSelection==="reminders")

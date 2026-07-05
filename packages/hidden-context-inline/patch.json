@@ -1,0 +1,91 @@
+{
+  "description": "Projects selected model-visible hidden attachment context into the regular Claude Code transcript renderer as warning system rows.",
+  "id": "hidden-context-inline",
+  "kind": "patch",
+  "label": "Hidden context inline projection",
+  "patch": {
+    "engine": "bun_graph_repack",
+    "targets": [
+      {
+        "sourceIdentity": {
+          "claudeVersion": "2.1.201",
+          "versionOutput": "2.1.201 (Claude Code)",
+          "sha256": "a0852d76afc47b30f5cb0b7625ec9a7714cb189f2eeef6c28c77e2be954fb7fd",
+          "sizeBytes": 231708784,
+          "platform": "darwin",
+          "arch": "arm64"
+        },
+        "requiredEngine": "bun_graph_repack",
+        "requiredBinaryFormat": "bun_standalone_macho64",
+        "modules": [
+          {
+            "path": "/$bunfs/root/src/entrypoints/cli.js",
+            "contentSha256": "46db617a7b13c062fb31595f6244819b11f7cdc6e6fed8e2c3f74a27fb6da1bd",
+            "contentLength": 18700756,
+            "operations": [
+              {
+                "opId": "projection-helpers-before-ypr-2-1-201",
+                "label": "Insert hidden-context projection helpers before the 2.1.201 hidden-attachment filter predicate",
+                "type": "insert_before",
+                "anchor": "function Ypr(e){",
+                "expectedAnchorCount": 1,
+                "insertOrder": 50,
+                "replacement": {
+                  "path": "payloads/projection-helpers-before-ypr-2.1.201.js",
+                  "sha256": "e86f0a00b85050f7030951452a6b20d85e5a920056d9e848899b593e6e2d2352"
+                },
+                "knownBehaviorChange": "Projects hidden model-context attachments into normal transcript rows before upstream hidden filtering."
+              },
+              {
+                "opId": "project-before-hidden-filter-2-1-201",
+                "label": "Project hidden attachment rows before the 2.1.201 transcript hides Ypr-filtered records",
+                "type": "replace_exact",
+                "exact": "let Fn=r||Ys()?Ee:qg(Ee,{includeFolded:!0}),_e=Klc(Fn.filter((_r)=>_r.type!==\"progress\").filter((_r)=>!Ypr(_r)).filter((_r)=>Xlc(_r,de)),ue)",
+                "requireWithinRange": [
+                  "filter((_r)=>!Ypr(_r))"
+                ],
+                "oldRangeSha256": "31ab75b0986fb742f91ba955cbf1db5374899dcdf0ea4a99a57268d9009511f1",
+                "oldRangeLength": 140,
+                "replacement": {
+                  "path": "payloads/project-before-hidden-filter-2.1.201.js",
+                  "sha256": "baee467044a8509f5db762a238c25fc89ba372b92f04264c1c56fb604ca2cf1d"
+                },
+                "knownBehaviorChange": "Expands the render list with visible warning rows for selected hidden model-context attachments before hidden filtering."
+              }
+            ]
+          }
+        ],
+        "postconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexNCHCProjectAttachment(e)"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "type:\"system\",subtype:\"codex_hidden_context\",level:\"warning\""
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "Fn=__codexNCHCProjectList(Fn)"
+          }
+        ],
+        "manualSmoke": {
+          "required": false
+        }
+      }
+    ]
+  },
+  "risk": {
+    "level": "low"
+  },
+  "schemaVersion": 1,
+  "packageVersion": "0.1.0",
+  "compatibility": {
+    "claudeVersions": [
+      "2.1.201"
+    ]
+  }
+}

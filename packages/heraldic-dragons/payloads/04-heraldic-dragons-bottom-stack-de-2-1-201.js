@@ -1,0 +1,1 @@
+de=Xd.jsx(__CodexHeraldicBottomStackV4,{maxHeight:w,children:[Se,le,ue]},"codex-heraldic-v12-bottom-stack")

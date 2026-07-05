@@ -1,0 +1,1 @@
+V=Xd.jsx(__CodexCapyOnsenFallbackWindowV4,{scrollable:n,bottom:s,modal:i},"codex-capy-onsen-v4-fallback-window")

@@ -1,0 +1,1 @@
+if(es.type==="system"&&es.subtype==="thinking_tokens"&&"estimated_tokens_delta"in es){try{__codexTTDRecordThinkingEstimate({estimatedTokens:es.estimated_tokens,estimatedTokensDelta:es.estimated_tokens_delta,streamKey:es.uuid,requestId:es.request_id})}catch(TN){}continue;}

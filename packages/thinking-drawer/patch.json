@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "kind": "patch",
+  "id": "thinking-drawer",
+  "label": "Thinking Drawer",
+  "description": "Projects raw and structured thinking text into a panel for real footer target wiring.",
+  "risk": {
+    "level": "medium",
+    "requiresConfirmation": true,
+    "notes": "Local display-only collector package for Claude Code internals; requires drawer-dock and manual smoke."
+  },
+  "compatibility": {
+    "claudeVersions": [
+      "2.1.201"
+    ],
+    "platforms": [
+      "darwin"
+    ],
+    "arches": [
+      "arm64"
+    ],
+    "notes": "Requires the shared drawer-dock framework and source identity a0852d76afc47b30f5cb0b7625ec9a7714cb189f2eeef6c28c77e2be954fb7fd."
+  },
+  "x-packageVersion": "0.1.0",
+  "patch": {
+    "engine": "bun_graph_repack",
+    "targets": [
+      {
+        "sourceIdentity": {
+          "claudeVersion": "2.1.201",
+          "versionOutput": "2.1.201 (Claude Code)",
+          "sha256": "a0852d76afc47b30f5cb0b7625ec9a7714cb189f2eeef6c28c77e2be954fb7fd",
+          "sizeBytes": 231708784,
+          "platform": "darwin",
+          "arch": "arm64"
+        },
+        "requiredEngine": "bun_graph_repack",
+        "requiredBinaryFormat": "bun_standalone_macho64",
+        "modules": [
+          {
+            "path": "/$bunfs/root/src/entrypoints/cli.js",
+            "contentSha256": "46db617a7b13c062fb31595f6244819b11f7cdc6e6fed8e2c3f74a27fb6da1bd",
+            "contentLength": 18700756,
+            "operations": [
+              {
+                "opId": "thinking-helpers-before-ypr",
+                "label": "Insert Thinking Text Drawer helpers before hidden attachment filter",
+                "type": "insert_before",
+                "replacement": {
+                  "path": "payloads/01-thinking-text-helpers.js",
+                  "sha256": "c0d778dc9067bdf6a6e0349014f8acf78bb716f15bd33fb3fb8a14846f926543"
+                },
+                "knownBehaviorChange": "Adds display-only Thinking collectors and helpers before the stock hidden attachment filter without claiming the Ypr byte span.",
+                "anchor": "function Ypr(e){",
+                "expectedAnchorCount": 1,
+                "insertOrder": 200
+              },
+              {
+                "opId": "thinking-message-start-turn-collector",
+                "label": "Capture current assistant message id for live thinking turn identity",
+                "type": "replace_exact",
+                "exact": "if(e.event.type===\"message_start\"){if(e.ttftMs!=null)o?.({type:\"start\",ttftMs:e.ttftMs,messageId:e.event.message.id});i?.((d)=>d.length>0?[]:d),LNo(),a?.((d)=>d!==null?null:d),u?.begin(e.event.message.id)}",
+                "requireWithinRange": [],
+                "oldRangeSha256": "927a38b9cbc9824bdbaa447ba97ca561e95e050ace91b4b7c18acbfd45e249c0",
+                "oldRangeLength": 205,
+                "replacement": {
+                  "path": "payloads/15-message-start-turn-collector.js",
+                  "sha256": "a266a41c3957a4cd8f222a8d162bf0dd9c2567af76a4bdc899ce84a1187487ef"
+                },
+                "knownBehaviorChange": "Captures display-only current turn identity for live thinking delta merge keys."
+              },
+              {
+                "opId": "thinking-message-stop-turn-collector",
+                "label": "Clear current live thinking turn identity at message stop",
+                "type": "replace_exact",
+                "exact": "if(e.event.type===\"message_stop\"){u?.finalize(),r?.(\"tool-use\"),i?.(()=>[]);return}",
+                "requireWithinRange": [],
+                "oldRangeSha256": "489aff6b8f985488ebf2c62d6587bea8bf212cd4b4900b46642106e60a546e0a",
+                "oldRangeLength": 83,
+                "replacement": {
+                  "path": "payloads/16-message-stop-turn-collector.js",
+                  "sha256": "1c3dad086efade6484c8efaefcda3f293b08aac5ab115d5daec847786595b14a"
+                },
+                "knownBehaviorChange": "Clears display-only current turn identity after streaming message completion."
+              },
+              {
+                "opId": "thinking-live-delta-collector",
+                "label": "Record live raw thinking_delta text before progress-only conversion",
+                "type": "replace_exact",
+                "exact": "case\"thinking_delta\":{let{delta:d}=e.event;if(\"estimated_tokens\"in d&&typeof d.estimated_tokens===\"number\")o?.({type:\"thinking_progress\",estimatedTokensDelta:d.estimated_tokens});else if(\"thinking\"in d&&typeof d.thinking===\"string\"&&d.thinking.length>0)o?.({type:\"thinking_progress\",estimatedTokensDelta:Kon(d.thinking)});return}",
+                "requireWithinRange": [],
+                "oldRangeSha256": "1f5f4f666044a2028c09ab4bf61c761aa8732621c625862cbf6856e1dfc56c3f",
+                "oldRangeLength": 329,
+                "replacement": {
+                  "path": "payloads/02-live-thinking-delta-collector.js",
+                  "sha256": "ce77319636a654fa17094d28223276de5903c24fd63cbd809a29e4d31a4cd8b9"
+                },
+                "knownBehaviorChange": "Records live raw thinking delta text into display-only drawer state when raw thinking text is present."
+              },
+              {
+                "opId": "thinking-signature-collector",
+                "label": "Preserve stock thinking signature handling without drawer rows",
+                "type": "replace_exact",
+                "exact": "case\"signature_delta\":o?.({type:\"thinking_signature\",chars:VVe(e.event.delta.signature.length)});return;",
+                "requireWithinRange": [],
+                "oldRangeSha256": "3788545b7730a78ff2bab560f2bffa447cb5cce61912b86df240b469f587b059",
+                "oldRangeLength": 104,
+                "replacement": {
+                  "path": "payloads/03-thinking-signature-collector.js",
+                  "sha256": "d34925318e8b3b3c45fadb0d7015e4c261379825f732818a09ee31481fd52d01"
+                },
+                "knownBehaviorChange": "Keeps stock thinking signature handling; drawer row helper is intentionally a no-op because signatures are not thinking text."
+              },
+              {
+                "opId": "thinking-parent-structured-collector",
+                "label": "Record structured thinking text at parent assistant content-list seam",
+                "type": "replace_exact",
+                "exact": "k=n.message.content.map(I),t[23]=s,t[24]=a,t[25]=T,t[26]=R,t[27]=c,t[28]=f,t[29]=r,t[30]=n.advisorModel,t[31]=n.message.content,t[32]=n.message.id,t[33]=n.uuid,t[34]=h,t[35]=u,t[36]=d,t[37]=p,t[38]=i,t[39]=l,t[40]=k",
+                "requireWithinRange": [],
+                "oldRangeSha256": "c764856f7ebd8e3c47776996ec96dcbc8ddb1400330ca9a08a8bf72f28fc0c77",
+                "oldRangeLength": 215,
+                "replacement": {
+                  "path": "payloads/04-structured-thinking-block-collector.js",
+                  "sha256": "519957f62422046b064152230f7fc39fe113dce71fc2d1f6567d7bb5a69be473"
+                },
+                "knownBehaviorChange": "Records structured thinking text at the parent assistant content-list seam; redacted-only blocks do not create drawer rows."
+              },
+              {
+                "opId": "thinking-system-token-estimate",
+                "label": "Preserve stock system thinking_tokens drop without drawer rows",
+                "type": "replace_exact",
+                "exact": "if(es.type===\"system\"&&es.subtype===\"thinking_tokens\"&&\"estimated_tokens_delta\"in es)continue;",
+                "requireWithinRange": [],
+                "oldRangeSha256": "a448d3c42fea5fafc847a8d7276720f16be7ec0256ccdb7790257bccfb37c218",
+                "oldRangeLength": 94,
+                "replacement": {
+                  "path": "payloads/13-system-thinking-token-estimate.js",
+                  "sha256": "4954d6929fbf978fd392e7c52d277ee11cfafd24252cb2ae7db9774cf447f621"
+                },
+                "knownBehaviorChange": "Keeps stock system thinking_tokens drop behavior; drawer estimate helper is intentionally a no-op because token estimates are not thinking text."
+              },
+              {
+                "opId": "thinking-cancel-salvage-collector",
+                "label": "Record cancel-salvaged thinking",
+                "type": "replace_exact",
+                "exact": "let en=_t?.thinking?.trim();if(en&&WAe().thinkingStartedAt!==null)kc((_s)=>[..._s,zT({content:[{type:\"thinking\",thinking:en,signature:\"\"}],isVirtual:!0})]);",
+                "requireWithinRange": [],
+                "oldRangeSha256": "369cfddb735a98bf9c922e4589284638306cf5a8931fc5d9a7d12bf3af1c13a3",
+                "oldRangeLength": 156,
+                "replacement": {
+                  "path": "payloads/14-cancel-salvage-collector.js",
+                  "sha256": "a09a5c29ba3558b146bd79b41ccc424fa70f9066cc382e601816e8934372b7e1"
+                },
+                "knownBehaviorChange": "Records interrupted in-flight thinking as salvaged display-only drawer text while preserving stock virtual block behavior."
+              },
+              {
+                "opId": "thinking-panel-real-target",
+                "label": "Provide Thinking panel for the real footer target overlay",
+                "type": "insert_before",
+                "replacement": {
+                  "path": "payloads/17-panel-real-target.js",
+                  "sha256": "f87fbbaef69a8f00cd497f4a07c4f6fccec68d4725f5fe939f588140d73d5ca8"
+                },
+                "knownBehaviorChange": "Renders Thinking only when the real thinking target is selected and locally open.",
+                "anchor": "var MXe,A_,Xd,GKo=2,pmr;",
+                "expectedAnchorCount": 1,
+                "insertOrder": 200
+              }
+            ]
+          }
+        ],
+        "preconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "thinking_delta"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "case\"thinking\""
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "thinking_tokens"
+          }
+        ],
+        "postconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__CODEX_THINKING_TEXT_DRAWER_FRAME_V1__"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "No thinking captured yet"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__codexTTDRecordSalvagedThinking"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__CODEX_THINKING_TEXT_DRAWER_TURN_V1__"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__codexTTDRecordLiveThinking"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__codexTTDRecordStructuredThinking"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__codexTTDRecordThinkingSignature"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__codexTTDRecordThinkingEstimate"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__codexTTDRecordRedactedThinking"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexTTDPanel"
+          }
+        ],
+        "manualSmoke": {
+          "required": true,
+          "reason": "Thinking text availability depends on live Claude Code stream behavior and Ctrl-O-visible structured thinking blocks."
+        }
+      }
+    ]
+  },
+  "requiresPackages": [
+    "drawer-dock"
+  ]
+}

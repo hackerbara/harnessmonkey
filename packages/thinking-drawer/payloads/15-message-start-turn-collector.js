@@ -1,0 +1,1 @@
+if(e.event.type==="message_start"){try{__codexTTDBeginTurn(e.event.message.id)}catch(d){}if(e.ttftMs!=null)o?.({type:"start",ttftMs:e.ttftMs,messageId:e.event.message.id});i?.((d)=>d.length>0?[]:d),LNo(),a?.((d)=>d!==null?null:d),u?.begin(e.event.message.id)}

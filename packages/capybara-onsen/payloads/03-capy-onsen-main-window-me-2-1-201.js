@@ -1,0 +1,1 @@
+me=Xd.jsx(__CodexCapyOnsenMainWindowV4,{children:Xd.jsxs(B,{flexGrow:1,flexDirection:"row",overflow:"hidden",children:[Ee,pe]})},"codex-capy-onsen-v4-main-window")

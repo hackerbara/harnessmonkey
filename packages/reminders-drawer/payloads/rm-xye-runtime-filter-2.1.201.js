@@ -1,0 +1,1 @@
+async function*XYe(e,t,n,r,o,s,i,a){let l=await i5l(e,t,n,r,s,i,a);l=l.filter((c)=>!__codexRMDenyAttachment(c));if(l.length===0)return;G("tengu_attachments",{attachment_types:l.map((c)=>c.type)});for(let c of l)yield ki(c,o)}

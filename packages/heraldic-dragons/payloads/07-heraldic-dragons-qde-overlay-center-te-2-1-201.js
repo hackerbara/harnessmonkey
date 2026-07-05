@@ -1,0 +1,1 @@
+te=i!=null?Xd.jsx(__CodexHeraldicModalProviderV4,{rows:S,columns:Math.max(1,__hdCenterColumns(T,0)-2*$be),scrollRef:a??null,children:Xd.jsx(B,{flexDirection:"column",marginLeft:__hdW,width:__hdCenterColumns(T,0),paddingX:$be,children:i})}):null

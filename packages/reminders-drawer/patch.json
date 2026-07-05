@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "kind": "patch",
+  "id": "reminders-drawer",
+  "label": "Reminders Drawer",
+  "description": "Runtime reminder/accounting suppression plus panel for real footer target wiring in Claude Code 2.1.201.",
+  "packageVersion": "2.1.201-real-target.1",
+  "compatibility": {
+    "claudeVersions": [
+      "2.1.201"
+    ]
+  },
+  "patch": {
+    "engine": "bun_graph_repack",
+    "targets": [
+      {
+        "sourceIdentity": {
+          "claudeVersion": "2.1.201",
+          "versionOutput": "2.1.201 (Claude Code)",
+          "sha256": "a0852d76afc47b30f5cb0b7625ec9a7714cb189f2eeef6c28c77e2be954fb7fd",
+          "sizeBytes": 231708784,
+          "platform": "darwin",
+          "arch": "arm64"
+        },
+        "requiredEngine": "bun_graph_repack",
+        "requiredBinaryFormat": "bun_standalone_macho64",
+        "modules": [
+          {
+            "path": "/$bunfs/root/src/entrypoints/cli.js",
+            "contentSha256": "46db617a7b13c062fb31595f6244819b11f7cdc6e6fed8e2c3f74a27fb6da1bd",
+            "contentLength": 18700756,
+            "operations": [
+              {
+                "opId": "rm-attachment-wrapper-deny",
+                "label": "Runtime deny gate for reminder attachment labels",
+                "type": "replace_between",
+                "startMarker": "async function _g(e,t){",
+                "endMarker": "async function len(e,t){",
+                "expectedStartMarkerCount": 1,
+                "expectedEndMarkerCount": 1,
+                "oldRangeSha256": "8d9b098b1d2bcef25a34776a820ee94b7398fcc40de77cf9da68a4d72bffac0f",
+                "oldRangeLength": 602,
+                "replacement": {
+                  "path": "payloads/rm-attachment-wrapper-deny-2.1.201.js",
+                  "sha256": "c4476007c7a14f53dc477b172eb99da09fd2c039842390ecf53e32a826730b2e"
+                },
+                "knownBehaviorChange": "Suppresses selected reminder/accounting attachment families and provides the spike-shaped real-target action wrapper."
+              },
+              {
+                "opId": "rm-xye-runtime-filter",
+                "label": "Runtime filter for reminder attachment objects",
+                "type": "replace_between",
+                "startMarker": "async function*XYe(e,t,n,r,o,s,i,a){",
+                "endMarker": "async function E5l(e){",
+                "expectedStartMarkerCount": 1,
+                "expectedEndMarkerCount": 1,
+                "oldRangeSha256": "3db820176d27dcac53b2a845322ca30fb882e7ebcf4e8c141ac5c6e423f208e6",
+                "oldRangeLength": 180,
+                "replacement": {
+                  "path": "payloads/rm-xye-runtime-filter-2.1.201.js",
+                  "sha256": "5760e1f8fc1edfcd5db640a82590b7302c04e2c72d6233a72a082fdd629a6e1a"
+                },
+                "knownBehaviorChange": "Filters selected reminder/accounting attachment objects before telemetry and transcript construction."
+              },
+              {
+                "opId": "rm-panel-real-target",
+                "label": "Provide Reminders panel for the real footer target overlay",
+                "type": "insert_before",
+                "anchor": "var MXe,A_,Xd,GKo=2,pmr;",
+                "expectedAnchorCount": 1,
+                "insertOrder": 300,
+                "replacement": {
+                  "path": "payloads/rm-panel-real-target-2.1.201.js",
+                  "sha256": "1fd642726e348512cf609c7a52d95477a59ecbf86b30fe3356f7b6a6378d1361"
+                },
+                "knownBehaviorChange": "Renders Reminders only when the real reminders target is selected and its local UI state is open."
+              }
+            ]
+          }
+        ],
+        "preconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "G(\"tengu_attachments\""
+          }
+        ],
+        "postconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexRMState("
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexRMDenyLabel("
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexRMWrapActions("
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexRMPanel("
+          }
+        ],
+        "manualSmoke": {
+          "required": true,
+          "reason": "Runtime reminders drawer rows/toggles require interactive footer smoke."
+        }
+      }
+    ]
+  },
+  "requiresPackages": [
+    "drawer-dock"
+  ],
+  "conflictsWithPackages": [
+    "mute-reminders"
+  ]
+}

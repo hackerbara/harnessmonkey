@@ -1,0 +1,164 @@
+from __future__ import annotations
+
+import json
+import os
+import shutil
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
+from pathlib import Path
+
+from harnessmonkey.config import HarnessMonkeyConfig
+from harnessmonkey.constants import OWNER_MARKER
+from harnessmonkey.paths import StatePaths
+
+
+@dataclass(frozen=True)
+class SourceIdentity:
+    path: Path
+    kind: str
+
+
+# CMux incident (field evidence, 2026-07): `install-shim` pointed at an
+# unrelated tool's bundled wrapper script (an 8KB bash script at
+# `/Applications/cmux.app/.../bin/claude`, nothing to do with HarnessMonkey)
+# was silently classified as "a plausible official Claude source" purely
+# because it was *some* executable file that wasn't one of HarnessMonkey's own
+# managed paths -- it was cached and swapped in as if it were the real thing.
+# The real Anthropic `claude` binary is ~230MB (a live install record showed
+# `previousSourceSizeBytes: 231708784`). 50MB is a generous margin below that
+# real size, while staying safely above any wrapper/shim script (the CMux
+# incident's file was 8KB) -- cheap to check via a single `stat()` call, no
+# execution of the candidate ever required or allowed.
+MIN_PLAUSIBLE_OFFICIAL_SIZE_BYTES = 50 * 1024 * 1024
+
+
+def meets_plausible_official_size(path: Path) -> bool:
+    """Cheap, offline size-floor check: does `path` stat at or above the
+    minimum size a real Claude binary could plausibly be?
+
+    Filesystem stat only -- never reads or executes `path`. Callers combine
+    this with their own existence/executable-bit/managed-path checks (see
+    `status.classify_plausible_official_source` and
+    `install.py`'s install-shim precondition, both of which apply this same
+    floor to different candidate paths).
+    """
+    try:
+        return path.stat().st_size >= MIN_PLAUSIBLE_OFFICIAL_SIZE_BYTES
+    except OSError:
+        return False
+
+
+def _resolve_existing_executable(candidate: str | Path | None) -> Path | None:
+    if candidate is None:
+        return None
+    try:
+        path = Path(candidate).expanduser().resolve(strict=True)
+    except (OSError, RuntimeError):
+        return None
+    if path.is_file() and os.access(path, os.X_OK):
+        return path
+    return None
+
+
+def _relative_to(path: Path, root: Path) -> bool:
+    try:
+        path.relative_to(root)
+        return True
+    except ValueError:
+        return False
+
+
+def is_managed_launcher_path(path: Path, paths: StatePaths) -> bool:
+    try:
+        resolved = Path(path).expanduser().resolve(strict=True)
+    except (OSError, RuntimeError):
+        resolved = Path(path).expanduser().resolve(strict=False)
+
+    managed_roots = [
+        paths.bin_dir.resolve(strict=False),
+        paths.versions_dir.resolve(strict=False),
+    ]
+    return any(_relative_to(resolved, root) for root in managed_roots)
+
+
+def _current_literal_path(paths: StatePaths) -> Path:
+    current = paths.current_path.expanduser()
+    if not current.is_absolute():
+        current = current.resolve(strict=False)
+    return current
+
+
+def _is_current_launcher_path(path: str | Path | None, paths: StatePaths) -> bool:
+    if path is None:
+        return False
+    try:
+        candidate = Path(path).expanduser()
+    except TypeError:
+        return False
+    if not candidate.is_absolute():
+        candidate = candidate.resolve(strict=False)
+    return candidate == _current_literal_path(paths)
+
+
+def _recorded_managed_target(paths: StatePaths) -> Path | None:
+    record_path = paths.state_dir / "install-record.json"
+    try:
+        raw = json.loads(record_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(raw, dict) or raw.get("owner") != OWNER_MARKER:
+        return None
+    target = raw.get("targetPath")
+    if not isinstance(target, str):
+        return None
+    try:
+        return Path(target).expanduser().resolve(strict=True)
+    except (OSError, RuntimeError):
+        return Path(target).expanduser().resolve(strict=False)
+
+
+def recorded_source_path(paths: StatePaths) -> Path | None:
+    """The original claude binary captured in the shim install record, if any."""
+    record_path = paths.state_dir / "install-record.json"
+    try:
+        raw = json.loads(record_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(raw, dict) or raw.get("owner") != OWNER_MARKER:
+        return None
+    source = raw.get("sourcePath")
+    if not isinstance(source, str):
+        return None
+    return Path(source).expanduser().resolve(strict=False)
+
+
+def source_identity(path: str | Path | None, paths: StatePaths, kind: str) -> SourceIdentity | None:
+    if _is_current_launcher_path(path, paths):
+        return None
+    resolved = _resolve_existing_executable(path)
+    if resolved is None or is_managed_launcher_path(resolved, paths):
+        return None
+    recorded_target = _recorded_managed_target(paths)
+    if recorded_target is not None and resolved == recorded_target:
+        return None
+    return SourceIdentity(path=resolved, kind=kind)
+
+
+def discover_official_claude(
+    config: HarnessMonkeyConfig,
+    paths: StatePaths,
+    environ: Mapping[str, str] | None = None,
+    which: Callable[[str], str | None] | None = None,
+) -> Path | None:
+    environ = os.environ if environ is None else environ
+    which = shutil.which if which is None else which
+
+    for candidate, kind in (
+        (config.officialClaudePath, "config"),
+        (environ.get("HARNESSMONKEY_SOURCE"), "env"),
+        (which("claude"), "path"),
+    ):
+        identity = source_identity(candidate, paths, kind)
+        if identity is not None:
+            return identity.path
+    return None

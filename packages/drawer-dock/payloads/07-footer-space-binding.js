@@ -1,0 +1,1 @@
+{context:"Footer",bindings:{up:"footer:up","ctrl+p":"footer:up",down:"footer:down","ctrl+n":"footer:down",right:"footer:next",left:"footer:previous",enter:"footer:openSelected",space:"footer:openSelected",escape:"footer:clearSelection",x:"footer:close"}}

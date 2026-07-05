@@ -1,0 +1,1 @@
+let Yt=r||js()?Te:xg(Te,{includeFolded:!0});Yt=__codexNCHCProjectList(Yt);let Ee=nQl(Yt.filter((Rt)=>Rt.type!=="progress").filter((Rt)=>!Jlr(Rt)).filter((Rt)=>iQl(Rt,le)),ce)

@@ -1,0 +1,131 @@
+{
+  "description": "Suppresses selected recurring reminder/accounting attachments before generator telemetry and transcript row creation.",
+  "id": "mute-reminders",
+  "kind": "patch",
+  "label": "Mute reminders",
+  "patch": {
+    "engine": "bun_graph_repack",
+    "targets": [
+      {
+        "manualSmoke": {
+          "required": false
+        },
+        "modules": [
+          {
+            "contentLength": 18700756,
+            "contentSha256": "46db617a7b13c062fb31595f6244819b11f7cdc6e6fed8e2c3f74a27fb6da1bd",
+            "operations": [
+              {
+                "opId": "_g-drop-denied-labels-2-1-201",
+                "label": "Drop denied attachment generator labels before generator execution and compute telemetry",
+                "type": "replace_between",
+                "startMarker": "async function _g(e,t){",
+                "endMarker": "async function len(e,t){",
+                "expectedStartMarkerCount": 1,
+                "expectedEndMarkerCount": 1,
+                "requireWithinRange": [
+                  "let n=Date.now()",
+                  "let r=await t()",
+                  "G(\"tengu_attachment_compute_duration\""
+                ],
+                "oldRangeSha256": "8d9b098b1d2bcef25a34776a820ee94b7398fcc40de77cf9da68a4d72bffac0f",
+                "oldRangeLength": 602,
+                "replacement": {
+                  "path": "payloads/filter-labels-before-_g-2.1.201.js",
+                  "sha256": "d28801c079ca327a96dba53eddd2d76f548cea1c90c655a149bbaac7deafcde9"
+                },
+                "knownBehaviorChange": "Selected reminder/accounting attachment generators return an empty list before their generator function and compute-duration telemetry run."
+              },
+              {
+                "opId": "xye-filter-before-ki-2-1-201",
+                "label": "Filter denied attachment objects before attachment telemetry and ki row construction",
+                "type": "replace_between",
+                "startMarker": "async function*XYe(e,t,n,r,o,s,i,a){",
+                "endMarker": "async function E5l(e){",
+                "expectedStartMarkerCount": 1,
+                "expectedEndMarkerCount": 1,
+                "requireWithinRange": [
+                  "let l=await i5l(e,t,n,r,s,i,a)",
+                  "G(\"tengu_attachments\"",
+                  "yield ki(c,o)"
+                ],
+                "oldRangeSha256": "3db820176d27dcac53b2a845322ca30fb882e7ebcf4e8c141ac5c6e423f208e6",
+                "oldRangeLength": 180,
+                "replacement": {
+                  "path": "payloads/filter-before-ki-2.1.201.js",
+                  "sha256": "eb960b1ee9429ca7fbe034e32ec444cd26d30996335575b6b918b5b544695131"
+                },
+                "knownBehaviorChange": "Denied attachment objects are filtered before active attachment telemetry and before ki(...) can create transcript rows."
+              }
+            ],
+            "path": "/$bunfs/root/src/entrypoints/cli.js"
+          }
+        ],
+        "postconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexUASDropLabel(e)"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexUASDropAttachment(e)"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "if(__codexUASDropLabel(e))return[];let n=Date.now()"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "l=l.filter((c)=>!__codexUASDropAttachment(c));if(l.length===0)return;G(\"tengu_attachments\""
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "async function _g(e,t){let n=Date.now();try{let r=await t()"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "async function*XYe(e,t,n,r,o,s,i,a){let l=await i5l(e,t,n,r,s,i,a);if(l.length===0)return;G(\"tengu_attachments\""
+          }
+        ],
+        "preconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "async function _g(e,t){let n=Date.now();try{let r=await t()"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "async function*XYe(e,t,n,r,o,s,i,a){let l=await i5l(e,t,n,r,s,i,a);if(l.length===0)return;G(\"tengu_attachments\""
+          }
+        ],
+        "requiredBinaryFormat": "bun_standalone_macho64",
+        "requiredEngine": "bun_graph_repack",
+        "sourceIdentity": {
+          "claudeVersion": "2.1.201",
+          "versionOutput": "2.1.201 (Claude Code)",
+          "sha256": "a0852d76afc47b30f5cb0b7625ec9a7714cb189f2eeef6c28c77e2be954fb7fd",
+          "sizeBytes": 231708784,
+          "platform": "darwin",
+          "arch": "arm64"
+        }
+      }
+    ]
+  },
+  "risk": {
+    "level": "low"
+  },
+  "schemaVersion": 1,
+  "packageVersion": "1.0.0",
+  "compatibility": {
+    "claudeVersions": [
+      "2.1.201"
+    ]
+  }
+}

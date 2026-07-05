@@ -1,0 +1,1 @@
+ee=Xd.jsx(__CodexHeraldicBottomStackV4,{children:[J,Q,s]},"codex-heraldic-v12-bottom-stack-qde")
