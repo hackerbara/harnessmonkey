@@ -6,12 +6,29 @@ build-backend = "setuptools.build_meta"
 name = "harnessmonkey"
 version = "0.1.0"
 description = "Source-first local userscript-style customization manager for Claude Code"
+readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
+authors = [{ name = "hackerbara" }]
+keywords = ["claude-code", "patching", "userscripts", "terminal"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Environment :: MacOS X",
+  "Operating System :: MacOS",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Developers",
+]
 dependencies = [
   "PySide6>=6.7",
   "pyobjc-framework-Cocoa>=10.0 ; sys_platform == 'darwin'",
 ]
+
+[project.urls]
+Homepage = "https://github.com/hackerbara/harnessmonkey"
+Repository = "https://github.com/hackerbara/harnessmonkey"
 
 [project.optional-dependencies]
 dev = [

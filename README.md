@@ -1,5 +1,5 @@
 # HarnessMonkey - UserScripts for Claude Code
-![capy-onsen-terminal](assets/demos/capyclaude.gif)
+![capy-onsen-terminal](https://raw.githubusercontent.com/hackerbara/harnessmonkey/main/assets/demos/capyclaude.gif)
 A reference example of a personal UserScript-style modification manager for Claude Code that handles applying/unapplying selected patches, command line options, and prompts to your selected `claude` location via a shim, patch engine, and re-packer.
 
 Provides a Python CLI tool, (ugly) GUI, and menubar manager. Reference for Mac only currently.
@@ -8,15 +8,15 @@ Provides a Python CLI tool, (ugly) GUI, and menubar manager. Reference for Mac o
 
 | Package | What it does | Demo |
 |---------|--------------|------|
-| [`thinking-drawer`](packages/thinking-drawer) | A footer drawer projecting the model's thinking text, raw and structured. | — |
-| [`reminders-drawer`](packages/reminders-drawer) | A footer drawer with live on/off toggles for seven recurring reminder/accounting attachment families. Runtime control instead of build-time suppression. | — |
-| [`mute-reminders`](packages/mute-reminders) | Statically suppresses those same seven attachment families upstream. The "just make it all quiet" option. Conflicts with `reminders-drawer` — pick one. | — |
-| [`hidden-context-drawer`](packages/hidden-context-drawer) | A footer "Hidden Context" drawer so you can read the model-visible attachment context (reminders, timestamps, token accounting) the harness normally hides from you. | — |
-| [`hidden-context-inline`](packages/hidden-context-inline) | Same hidden context, projected straight into the transcript as inline warning rows. Conflicts with the drawer — pick one. | — |
-| [`heraldic-dragons`](packages/heraldic-dragons) | Two heraldic fire-breathing pixel-art dragons flanking your terminal, with animated flames. Take it to 11 sometime, you know? Needs a truecolor terminal, Ghostty etc. One art scene at a time — conflicts with `capybara-onsen`. | — |
-| [`capybara-onsen`](packages/capybara-onsen) | Capybaras chilling. It's very brave of them to do so if you think about it. Also truecolor, also one scene at a time. | — |
-| [`fable-fallback`](packages/fable-fallback) | Un-hides Fable→Opus safety-classifier downgrade events: warning banner in resumed chats, marker in the `/resume` picker. The original reason this repo exists. | — |
-| [`drawer-dock`](packages/drawer-dock) | The shared footer-drawer framework the three drawer scripts above plug into. Enable it alongside any of them. Demo shows the full dock with all three aboard. | — |
+| [`thinking-drawer`](https://github.com/hackerbara/harnessmonkey/tree/main/packages/thinking-drawer) | A footer drawer projecting the model's thinking text, raw and structured. | — |
+| [`reminders-drawer`](https://github.com/hackerbara/harnessmonkey/tree/main/packages/reminders-drawer) | A footer drawer with live on/off toggles for seven recurring reminder/accounting attachment families. Runtime control instead of build-time suppression. | — |
+| [`mute-reminders`](https://github.com/hackerbara/harnessmonkey/tree/main/packages/mute-reminders) | Statically suppresses those same seven attachment families upstream. The "just make it all quiet" option. Conflicts with `reminders-drawer` — pick one. | — |
+| [`hidden-context-drawer`](https://github.com/hackerbara/harnessmonkey/tree/main/packages/hidden-context-drawer) | A footer "Hidden Context" drawer so you can read the model-visible attachment context (reminders, timestamps, token accounting) the harness normally hides from you. | — |
+| [`hidden-context-inline`](https://github.com/hackerbara/harnessmonkey/tree/main/packages/hidden-context-inline) | Same hidden context, projected straight into the transcript as inline warning rows. Conflicts with the drawer — pick one. | — |
+| [`heraldic-dragons`](https://github.com/hackerbara/harnessmonkey/tree/main/packages/heraldic-dragons) | Two heraldic fire-breathing pixel-art dragons flanking your terminal, with animated flames. Take it to 11 sometime, you know? Needs a truecolor terminal, Ghostty etc. One art scene at a time — conflicts with `capybara-onsen`. | — |
+| [`capybara-onsen`](https://github.com/hackerbara/harnessmonkey/tree/main/packages/capybara-onsen) | Capybaras chilling. It's very brave of them to do so if you think about it. Also truecolor, also one scene at a time. | — |
+| [`fable-fallback`](https://github.com/hackerbara/harnessmonkey/tree/main/packages/fable-fallback) | Un-hides Fable→Opus safety-classifier downgrade events: warning banner in resumed chats, marker in the `/resume` picker. The original reason this repo exists. | — |
+| [`drawer-dock`](https://github.com/hackerbara/harnessmonkey/tree/main/packages/drawer-dock) | The shared footer-drawer framework the three drawer scripts above plug into. Enable it alongside any of them. Demo shows the full dock with all three aboard. | — |
 
 ### Why these scripts?
 
