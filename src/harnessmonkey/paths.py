@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from pathlib import Path
+
+from harnessmonkey.platform_support import default_state_dir
 
 
 @dataclass(frozen=True)
@@ -46,5 +47,4 @@ class StatePaths:
 
 
 def default_paths() -> StatePaths:
-    home = Path(os.environ.get("HOME", str(Path.home())))
-    return StatePaths(state_dir=home / ".harnessmonkey")
+    return StatePaths(state_dir=default_state_dir())

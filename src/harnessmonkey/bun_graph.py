@@ -6,6 +6,7 @@ from dataclasses import dataclass
 TRAILER = b"\n---- Bun! ----\n"
 MODULE_RECORD_SIZE = 52
 POINTER_PAIR_COUNT = 6
+_BUNFS_PREFIXES = ("/$bunfs/", "file:///$bunfs/", "B:/~BUN/", "B:\\~BUN\\")
 
 
 class BunGraphError(ValueError):
@@ -175,7 +176,7 @@ def parse_bun_section(section: bytes) -> BunGraph:
             content = _slice(payload, content_offset, content_size)
         except UnicodeDecodeError as exc:
             raise BunGraphError("module_path_not_utf8") from exc
-        if not path.startswith("/$bunfs/") and not path.startswith("file:///$bunfs/"):
+        if not path.startswith(_BUNFS_PREFIXES):
             validation_errors.append(f"module {index} suspicious path {path!r}")
         if content_offset + content_size > byte_count:
             validation_errors.append(f"module {index} content out of byte_count")

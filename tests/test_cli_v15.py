@@ -410,4 +410,9 @@ def test_validate_package_json_reports_non_macho_without_traceback(tmp_path, cap
     assert captured.err == ""
     payload = json.loads(captured.out)
     assert payload["ok"] is False
-    assert payload["errorCode"] == "unsupported_macho_magic"
+    # Container-format detection now runs before Mach-O-specific parsing (so PE
+    # inputs can be routed correctly too), so unrecognized bytes are reported as
+    # a generic unknown-format validation failure rather than a Mach-O-specific
+    # magic error.
+    assert payload["errorCode"] == "validation_failed"
+    assert any("unknown_binary_format" in err for err in payload["errors"])

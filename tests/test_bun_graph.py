@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import struct
+
 import pytest
 from tests.fixtures_bun import MODULE_PATH_0, TRAILER, build_payload
 
@@ -91,3 +93,33 @@ def test_parse_bun_section_reports_duplicate_module_paths():
     graph = parse_bun_section(bytes(payload))
 
     assert any("duplicate_module_path" in item for item in graph.validation_errors)
+
+
+def _payload_with_path(path: bytes) -> bytes:
+    content = b"module-body"
+    chunks = bytearray()
+    path_off = len(chunks); chunks.extend(path)
+    content_off = len(chunks); chunks.extend(content)
+    modules_off = len(chunks)
+    rec = struct.pack("<IIII", path_off, len(path), content_off, len(content))
+    rec += struct.pack("<IIIIIIII", 0, 0, 0, 0, 0, 0, 0, 0)
+    rec += struct.pack("<I", 0x00030201)  # 13 u32 total = MODULE_RECORD_SIZE (52 bytes)
+    chunks.extend(rec)
+    byte_count = len(chunks)
+    chunks.extend(struct.pack("<Q", byte_count))
+    chunks.extend(struct.pack("<IIIIII", modules_off, len(rec), 0, 0, 0, 0))
+    chunks.extend(TRAILER)
+    payload = bytes(chunks)
+    return struct.pack("<Q", len(payload)) + payload
+
+
+def test_windows_bunfs_prefix_is_not_suspicious():
+    section = _payload_with_path(b"B:/~BUN/root/src/entrypoints/cli.js")
+    graph = parse_bun_section(section)
+    assert graph.validation_errors == []
+
+
+def test_unknown_prefix_still_suspicious():
+    section = _payload_with_path(b"/etc/passwd")
+    graph = parse_bun_section(section)
+    assert any("suspicious path" in e for e in graph.validation_errors)

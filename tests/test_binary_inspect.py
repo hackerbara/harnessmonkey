@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from tests.fixtures_bun import MODULE_PATH_0, TRAILER, build_macho_fixture
 
 from harnessmonkey.binary_inspect import inspect_binary_bytes
@@ -35,3 +37,15 @@ def test_inspect_binary_bytes_marks_duplicate_module_paths_not_ok():
 
     assert report["ok"] is False
     assert any("duplicate_module_path" in item for item in report["validationErrors"])
+
+
+def test_inspect_real_windows_binary_ok():
+    from tests.harnessmonkey_binary import win_claude_bin
+
+    src = win_claude_bin()
+    if not src.exists():
+        pytest.skip(f"missing Windows claude.exe fixture: {src}")
+    result = inspect_binary_bytes(src.read_bytes(), source_path=str(src))
+    assert result["ok"] is True
+    assert result["format"] == "pe64"
+    assert any(m["path"] == "B:/~BUN/root/src/entrypoints/cli.js" for m in result["modules"])

@@ -5,7 +5,7 @@ from typing import Any, Literal
 
 HEX_DIGITS = set("0123456789abcdefABCDEF")
 SUPPORTED_ENGINES = {"bun_graph_repack"}
-SUPPORTED_BINARY_FORMATS = {"bun_standalone_macho64"}
+SUPPORTED_BINARY_FORMATS = {"bun_standalone_macho64", "bun_standalone_pe64"}
 SUPPORTED_OPERATION_TYPES = {
     "replace_between",
     "replace_exact",

@@ -57,3 +57,17 @@ def claude_version_path(version: str) -> Path:
     fixture that is never present in the public repo or CI.
     """
     return claude_versions_dir() / version
+
+
+WIN_CLAUDE_BIN_ENV = "HARNESSMONKEY_WIN_SOURCE"
+
+
+def win_claude_bin() -> Path:
+    """Location of the pinned Windows claude.exe spike fixture (never committed)."""
+    override = os.environ.get(WIN_CLAUDE_BIN_ENV)
+    if override:
+        return Path(override)
+    return (
+        Path.home()
+        / ".local" / "share" / "harnessmonkey-dev" / "win32-x64" / "2.1.201" / "claude.exe"
+    )

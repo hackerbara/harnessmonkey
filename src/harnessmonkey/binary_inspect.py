@@ -3,17 +3,24 @@ from __future__ import annotations
 import hashlib
 from typing import Any
 
+from harnessmonkey.binary_format import detect_binary_format, locate_bun_section
 from harnessmonkey.bun_graph import parse_bun_section
-from harnessmonkey.macho import find_macho_layout
 
 
 def inspect_binary_bytes(data: bytes, *, source_path: str) -> dict[str, Any]:
     source_sha = hashlib.sha256(data).hexdigest()
     try:
-        layout = find_macho_layout(data)
-        start = layout.bun_section.offset
-        end = layout.bun_section.offset + layout.bun_section.size
-        graph = parse_bun_section(data[start:end])
+        fmt = detect_binary_format(data)
+        start, length = locate_bun_section(data)
+        graph = parse_bun_section(data[start:start + length])
+        if fmt == "macho":
+            from harnessmonkey.macho import find_macho_layout
+            layout = find_macho_layout(data)
+            bun_segment_name = layout.bun_segment.name
+            bun_section_name = layout.bun_section.name
+        else:
+            bun_segment_name = ""
+            bun_section_name = ".bun"
     except Exception as exc:
         return {
             "schemaVersion": 1,
@@ -33,11 +40,11 @@ def inspect_binary_bytes(data: bytes, *, source_path: str) -> dict[str, Any]:
         "sourcePath": source_path,
         "sourceSha256": source_sha,
         "sourceSizeBytes": len(data),
-        "format": "macho64",
+        "format": "macho64" if fmt == "macho" else "pe64",
         "supported": True,
         "bun": {
-            "segment": layout.bun_segment.name,
-            "section": layout.bun_section.name,
+            "segment": bun_segment_name,
+            "section": bun_section_name,
             "payloadLength": graph.declared_payload_len,
             "trailerOffset": graph.trailer_offset,
             "moduleRecordSize": graph.module_record_size,

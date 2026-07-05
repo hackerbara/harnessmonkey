@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
+from harnessmonkey import platform_support
 from harnessmonkey.config import HarnessMonkeyConfig, LaunchProfile
 from harnessmonkey.paths import StatePaths
 from harnessmonkey.source_discovery import discover_official_claude, is_managed_launcher_path
@@ -94,3 +96,40 @@ def test_external_official_current_target_remains_discoverable(tmp_path):
     found = discover_official_claude(config(str(official)), paths, {}, lambda _: None)
 
     assert found == official.resolve()
+
+
+def test_windows_install_candidate_discovered_when_faked_windows(tmp_path, monkeypatch):
+    monkeypatch.setattr(platform_support.sys, "platform", "win32")
+    # is_executable_file splits PATHEXT on os.pathsep (";" on real Windows,
+    # matching real PATHEXT formatting there); os.pathsep is tied to os.name,
+    # not the faked sys.platform, so on this host it's still ":".
+    monkeypatch.setenv("PATHEXT", os.pathsep.join([".COM", ".EXE", ".BAT", ".CMD"]))
+    paths = StatePaths(state_dir=tmp_path / ".harnessmonkey")
+    launcher = tmp_path / ".local" / "bin" / "claude.exe"
+    launcher.parent.mkdir(parents=True)
+    launcher.write_text("claude")
+
+    found = discover_official_claude(
+        config(), paths, {"USERPROFILE": str(tmp_path)}, lambda _: None
+    )
+
+    assert found == launcher.resolve()
+
+
+def test_windows_non_executable_extension_not_discovered(tmp_path, monkeypatch):
+    monkeypatch.setattr(platform_support.sys, "platform", "win32")
+    # PATHEXT deliberately excludes .exe -- a file at the expected launcher
+    # path exists, but its extension is not recognized as executable, so it
+    # must NOT be treated as discoverable (proves is_executable_file gates
+    # correctly through the "install" candidate path).
+    monkeypatch.setenv("PATHEXT", os.pathsep.join([".COM", ".BAT", ".CMD"]))
+    paths = StatePaths(state_dir=tmp_path / ".harnessmonkey")
+    launcher = tmp_path / ".local" / "bin" / "claude.exe"
+    launcher.parent.mkdir(parents=True)
+    launcher.write_text("claude")
+
+    found = discover_official_claude(
+        config(), paths, {"USERPROFILE": str(tmp_path)}, lambda _: None
+    )
+
+    assert found is None

@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "kind": "patch",
+  "id": "capybara-onsen-win",
+  "label": "Capybara Onsen (Windows)",
+  "description": "A calming twilight Japanese onsen scene with two capybaras \u2014 baked half-block pixel art with 16-phase water/steam animation, drawn via the renderer's native ink-raw-ansi direct-draw path.",
+  "packageVersion": "1.4.4-footer-drawer-overlay-fix-win",
+  "compatibility": {
+    "claudeVersions": [
+      "2.1.201"
+    ]
+  },
+  "patch": {
+    "engine": "bun_graph_repack",
+    "targets": [
+      {
+        "sourceIdentity": {
+          "claudeVersion": "2.1.201",
+          "versionOutput": "2.1.201 (Claude Code)",
+          "sha256": "fb804ee019bfbb8d7e85abf965e528e53b5aa5a4e4ebc0f164139dc10a9e0320",
+          "sizeBytes": 241591968,
+          "platform": "win32",
+          "arch": "x64"
+        },
+        "requiredEngine": "bun_graph_repack",
+        "requiredBinaryFormat": "bun_standalone_pe64",
+        "modules": [
+          {
+            "path": "B:/~BUN/root/src/entrypoints/cli.js",
+            "contentSha256": "63154b978bb29a873e54fa8a622a5f5bce3b5cd3461cfa926cce010cabced1e2",
+            "contentLength": 18745538,
+            "operations": [
+              {
+                "opId": "capy-onsen-context-frame-helpers-before-vko-win-2-1-201",
+                "label": "Insert physical frame plus fde center provider and modal-only t4 before app shell VKo",
+                "type": "replace_exact",
+                "exact": "function eKo(e){let t=OJe.c(78)",
+                "requireWithinRange": [
+                  "function eKo(e){"
+                ],
+                "oldRangeSha256": "1e47e2c2afbd978b7d8bb36504bf40138b4fb5ee5c5d57de135665541e640a82",
+                "oldRangeLength": 31,
+                "replacement": {
+                  "path": "payloads/01-capy-onsen-context-frame-helpers-before-vko-2-1-201.js",
+                  "sha256": "a7d0dc084c0533d116877e3b004b5ea13a54034de647b2f003ea186b715b1897"
+                },
+                "knownBehaviorChange": "Defines clipped 30-column visible side gutters, responsive right-gutter collapse at <=140 columns, and a center-column fde/useTerminalSize provider while reserving t4 for real modal/scrollbox overlays."
+              },
+              {
+                "opId": "capy-onsen-center-columns-a-win-2-1-201",
+                "label": "Shrink VKo local column context by the onsen gutters",
+                "type": "replace_exact",
+                "exact": "A=Math.max(1,_-m)",
+                "requireWithinRange": [
+                  "A=Math.max(1,_-m)"
+                ],
+                "oldRangeSha256": "4a5c0e3d1aa1a8d8160142525ce040933022d6602ffa274df99df26ff4e2da30",
+                "oldRangeLength": 17,
+                "replacement": {
+                  "path": "payloads/02-capy-onsen-center-columns-a-2-1-201.js",
+                  "sha256": "8cab63082d670d38dbcc90be06e6ad5bdaa7514383d2032d3fcfc105454795cf"
+                },
+                "knownBehaviorChange": "Makes VKo transcript context reserve both onsen gutters and any sidebar."
+              },
+              {
+                "opId": "capy-onsen-main-window-me-win-2-1-201",
+                "label": "Physically wrap the fullscreen main window row in onsen gutters (me)",
+                "type": "replace_exact",
+                "exact": "fe=Xd.jsxs(F,{flexGrow:1,flexDirection:\"row\",overflow:\"hidden\",children:[He,pe]})",
+                "requireWithinRange": [
+                  "children:[He,pe]"
+                ],
+                "oldRangeSha256": "a20dbb64e15ae0750321da76b84cc43d205cb1b6b93b08658354c12ac604d621",
+                "oldRangeLength": 81,
+                "replacement": {
+                  "path": "payloads/03-capy-onsen-main-window-me-2-1-201.js",
+                  "sha256": "a9a43ee5d408d3173e7b1f6f8713b65cd516868228c84d31b7353d886c314d66"
+                },
+                "knownBehaviorChange": "Constrains the whole main window row between explicit gutters and gives center children a narrowed fde context without putting normal content in modal/scrollbox t4."
+              },
+              {
+                "opId": "capy-onsen-bottom-stack-de-win-2-1-201",
+                "label": "Physically wrap fullscreen bottom chrome/prompt/footer stack in onsen gutters (de)",
+                "type": "replace_exact",
+                "exact": "de=Xd.jsxs(F,{flexDirection:\"column\",flexShrink:0,width:\"100%\",maxHeight:C,children:[Se,le,ue]})",
+                "requireWithinRange": [
+                  "children:[Se,le,ue]"
+                ],
+                "oldRangeSha256": "0571fc3059275a347113a6e81765905cdfb36dedfee33d31ee2fa146a789a1e3",
+                "oldRangeLength": 96,
+                "replacement": {
+                  "path": "payloads/04-capy-onsen-bottom-stack-de-2-1-201.js",
+                  "sha256": "36c0bb35ec16243336ee32b95776a1d2fbbf6f09cf227830d603ee387e71def1"
+                },
+                "knownBehaviorChange": "Constrains prompt/footer/bottom overlays to an explicit center width and narrowed fde context while leaving footer drawer overlays unclipped and rendering pool water in both gutters."
+              },
+              {
+                "opId": "capy-onsen-fullscreen-modal-center-fe-win-2-1-201",
+                "label": "Physically and contextually constrain fullscreen modal overlay to the center column (fe)",
+                "type": "replace_exact",
+                "exact": "me=i!=null&&Xd.jsx(t3,{value:{rows:S,columns:_-2*FEe,scrollRef:a??null,claimScrollBox:null},children:Xd.jsxs(F,{position:\"absolute\",bottom:0,left:0,right:0,maxHeight:b-Zzo,flexDirection:\"column\",overflow:\"hidden\",opaque:!0,children:[Xd.jsx(F,{flexShrink:0,children:Xd.jsx(RS,{color:\"permission\",char:\"\\u2594\"})}),Xd.jsx(Yum,{scrollRef:a,maxRows:S,children:i})]})})",
+                "requireWithinRange": [
+                  "position:\"absolute\",bottom:0,left:0,right:0"
+                ],
+                "oldRangeSha256": "b2b5fc80f815b32561c5db835bdf2679283569835159311a223faa27dbbfe2e5",
+                "oldRangeLength": 364,
+                "replacement": {
+                  "path": "payloads/05-capy-onsen-fullscreen-modal-center-fe-2-1-201.js",
+                  "sha256": "9e9167d8549320657b867a2306862fa5e2ad1445bb22a0e531d0ef286fe625fb"
+                },
+                "knownBehaviorChange": "Keeps modal/sub-agent style overlays in an explicit center-width box and narrowed real modal t4 context."
+              },
+              {
+                "opId": "capy-onsen-qde-bottom-stack-ee-win-2-1-201",
+                "label": "Physically wrap QDe bottom chrome/prompt/footer stack in onsen gutters (ee)",
+                "type": "replace_exact",
+                "exact": "ee=Xd.jsxs(Xd.Fragment,{children:[X,Q,s]})",
+                "requireWithinRange": [
+                  "children:[X,Q,s]"
+                ],
+                "oldRangeSha256": "39afe50ec37f3ee343e5b4712e69cd41a33d9b0960a5ceb299d3cc5dd0c7bcbc",
+                "oldRangeLength": 42,
+                "replacement": {
+                  "path": "payloads/06-capy-onsen-qde-bottom-stack-ee-2-1-201.js",
+                  "sha256": "2d6ee24214df98c51f0741c970622f80cec5091c604a688b99eb2f265729b1b4"
+                },
+                "knownBehaviorChange": "Constrains the prompt/footer stack in the terminal-scroll-region path."
+              },
+              {
+                "opId": "capy-onsen-qde-overlay-center-te-win-2-1-201",
+                "label": "Physically and contextually constrain QDe overlay to the center column (te)",
+                "type": "replace_exact",
+                "exact": "te=i!=null?Xd.jsx(t3,{value:{rows:S,columns:_-2*FEe,scrollRef:a??null,claimScrollBox:null},children:Xd.jsx(F,{flexDirection:\"column\",paddingX:FEe,children:i})}):null",
+                "requireWithinRange": [
+                  "paddingX:FEe,children:i"
+                ],
+                "oldRangeSha256": "63df373045139e7b1bab112cc16ed6f51b6a4ff2c2dbe50ae3f532540c36975e",
+                "oldRangeLength": 165,
+                "replacement": {
+                  "path": "payloads/07-capy-onsen-qde-overlay-center-te-2-1-201.js",
+                  "sha256": "73c5792d5adf0dd483bbb355486b58505d3e937a95949d8d7527bcdbcab00848"
+                },
+                "knownBehaviorChange": "Keeps overlay contents out of gutters using an explicit center-width box and narrowed real modal t4 context."
+              },
+              {
+                "opId": "capy-onsen-fallback-window-v-win-2-1-201",
+                "label": "Physically wrap fallback scrollable/bottom/modal window in onsen gutters (V)",
+                "type": "replace_exact",
+                "exact": "q=Xd.jsxs(Xd.Fragment,{children:[n,s,i]})",
+                "requireWithinRange": [
+                  "children:[n,s,i]"
+                ],
+                "oldRangeSha256": "b538bc1b0f81e66c360e3c3949774c59c37ba294a5cbcd040bdf3104c8da4a00",
+                "oldRangeLength": 41,
+                "replacement": {
+                  "path": "payloads/08-capy-onsen-fallback-window-v-2-1-201.js",
+                  "sha256": "019e951f9c85e3b0840bf6d0a33aaa137eced40d0d02ad6bbf1ad6e737f50993"
+                },
+                "knownBehaviorChange": "Uses the same physical/contextual main and bottom frame in the non-fullscreen fallback path."
+              }
+            ]
+          }
+        ],
+        "preconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "function eKo(e){let t=OJe.c(78)"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "A=Math.max(1,_-m)"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "fe=Xd.jsxs(F,{flexGrow:1,flexDirection:\"row\",overflow:\"hidden\",children:[He,pe]})"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "de=Xd.jsxs(F,{flexDirection:\"column\",flexShrink:0,width:\"100%\",maxHeight:C,children:[Se,le,ue]})"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "me=i!=null&&Xd.jsx(t3,{value:{rows:S,columns:_-2*FEe,scrollRef:a??null,claimScrollBox:null},children:Xd.jsxs(F,{position:\"absolute\",bottom:0,left:0,right:0,maxHeight:b-Zzo,flexDirection:\"column\",overflow:\"hidden\",opaque:!0,children:[Xd.jsx(F,{flexShrink:0,children:Xd.jsx(RS,{color:\"permission\",char:\"\\u2594\"})}),Xd.jsx(Yum,{scrollRef:a,maxRows:S,children:i})]})})"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "ee=Xd.jsxs(Xd.Fragment,{children:[X,Q,s]})"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "te=i!=null?Xd.jsx(t3,{value:{rows:S,columns:_-2*FEe,scrollRef:a??null,claimScrollBox:null},children:Xd.jsx(F,{flexDirection:\"column\",paddingX:FEe,children:i})}):null"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "q=Xd.jsxs(Xd.Fragment,{children:[n,s,i]})"
+          }
+        ],
+        "postconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "function __coCenterProviderV4"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "function __CodexCapyOnsenMainWindowV4"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "function __CodexCapyOnsenBottomStackV4"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "codex-capy-onsen-v6-pool-right-responsive"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "codex-capy-onsen-v6-right-responsive"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "function __coRightWidthV6"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "__coResponsiveBreakpointV6=140"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "A=__coCenterColumns(_,m)"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "codex-capy-onsen-v4-main-window"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "codex-capy-onsen-v4-bottom-stack"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "a=n!==void 0||r!==void 0,l=a?Xd.jsx(t3,{value:i,children:o}):o"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "Xd.jsx(mde,{value:s,children:Xd.jsx(t3,{value:i,children:o})})"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "s=Ay.useMemo(()=>({rows:e,columns:t}),[e,t])"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "\"ink-raw-ansi\""
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "String.fromCharCode(9600)"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "\u2580"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "codex-capy-onsen-v5-width-readout"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "__coClipColsV7=2"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "__coW=__coArtW-__coClipColsV7"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "B:/~BUN/root/src/entrypoints/cli.js",
+            "value": "function __coCropRunsV7"
+          }
+        ],
+        "manualSmoke": {
+          "required": true,
+          "reason": "Purely visual TUI art plus global center-column context wrapping. Correct rendering, animation, main transcript, prompt/footer/modal containment, and resize behavior must be confirmed interactively in a truecolor terminal."
+        }
+      }
+    ]
+  }
+}

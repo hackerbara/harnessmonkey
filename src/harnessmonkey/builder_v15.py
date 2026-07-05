@@ -9,10 +9,15 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+from harnessmonkey.binary_format import (
+    detect_binary_format,
+    locate_bun_section,
+    repack_for_format,
+)
 from harnessmonkey.binary_inspect import inspect_binary_bytes
 from harnessmonkey.bun_graph import BunGraphError, parse_bun_section
 from harnessmonkey.install import use_official
-from harnessmonkey.macho import MachOError, find_macho_layout
+from harnessmonkey.macho import MachOError
 from harnessmonkey.manifest_v2 import (
     AssertionV2,
     ManifestV2,
@@ -33,7 +38,6 @@ from harnessmonkey.module_patch import (
 )
 from harnessmonkey.package_model import PackageKind, PackageValidationError, load_package_manifest
 from harnessmonkey.progress import StageTracker
-from harnessmonkey.repack import repack_changed_modules
 from harnessmonkey.reports_v2 import BuildReportV2
 from harnessmonkey.smoke import (
     CommandResult,
@@ -169,10 +173,8 @@ def validate_package(request: ValidationRequestV15) -> dict[str, Any]:
                 "errors": ["source identity did not match exactly"],
             }
         target = matching_targets[0]
-        layout = find_macho_layout(source)
-        graph = parse_bun_section(
-            source[layout.bun_section.offset : layout.bun_section.offset + layout.bun_section.size]
-        )
+        start, length = locate_bun_section(source)
+        graph = parse_bun_section(source[start : start + length])
         if graph.validation_errors:
             return {
                 "schemaVersion": 1,
@@ -430,7 +432,17 @@ def _target_identity_mismatch_status(
     return "unknown"
 
 
-def _apply_signing_v15(report: BuildReportV2, output: Path, runner: CommandRunner) -> bool:
+def _apply_signing_v15(
+    report: BuildReportV2,
+    output: Path,
+    runner: CommandRunner,
+    *,
+    source_bytes: bytes | None = None,
+) -> bool:
+    fmt = detect_binary_format(source_bytes) if source_bytes is not None else "macho"
+    if fmt == "pe":
+        report.signingResult = {"status": "skipped", "reason": "pe_no_signing"}
+        return True
     safe_runner = _safe_runner(runner)
     sign = codesign_sign(output, safe_runner)
     verify = codesign_verify(output, safe_runner)
@@ -524,10 +536,8 @@ def build_patchset_v15(request: BuildRequestV15) -> BuildReportV2:
                     raise ValueError(
                         f"patch_conflict:package_conflict:{manifest.id}:{conflict}"
                     )
-        layout = find_macho_layout(source)
-        graph = parse_bun_section(
-            source[layout.bun_section.offset : layout.bun_section.offset + layout.bun_section.size]
-        )
+        start, length = locate_bun_section(source)
+        graph = parse_bun_section(source[start : start + length])
         if graph.validation_errors:
             raise ValueError(f"bun_graph_invalid:{graph.validation_errors}")
         original_modules = {module.path: module.content for module in graph.modules}
@@ -599,7 +609,7 @@ def build_patchset_v15(request: BuildRequestV15) -> BuildReportV2:
             raise ValueError("no_module_changes")
         tracker.done()
         tracker.start("repack")
-        repack = repack_changed_modules(source, changed_modules)
+        repack = repack_for_format(source, changed_modules)
         for _, manifest, target in selected:
             for assertion in target.postconditions:
                 result = _assert_condition_v2(
@@ -610,7 +620,8 @@ def build_patchset_v15(request: BuildRequestV15) -> BuildReportV2:
                 verification_results.append({"packageId": manifest.id, **result})
                 if not result["passed"]:
                     raise ValueError(f"postcondition_failed:{manifest.id}")
-        output = request.output_dir / "claude"
+        output_name = "claude.exe" if detect_binary_format(source) == "pe" else "claude"
+        output = request.output_dir / output_name
         output.write_bytes(repack.output_bytes)
         shutil.copymode(request.source_path, output)
         report.outputPath = str(output)
@@ -659,7 +670,9 @@ def build_patchset_v15(request: BuildRequestV15) -> BuildReportV2:
         blockers: list[str] = []
         if request.run_signing:
             tracker.start("sign")
-            if not _apply_signing_v15(report, output, request.command_runner):
+            if not _apply_signing_v15(
+                report, output, request.command_runner, source_bytes=source
+            ):
                 tracker.fail("signing failed")
                 _write_report(report, report_path)
                 return report

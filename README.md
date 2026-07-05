@@ -53,6 +53,10 @@ Prefer terminal-only? `uv run harnessmonkey install --cli` skips the menubar app
 
 Changed your mind? `uv run harnessmonkey uninstall` takes the menubar app back out.
 
+### Experimental: Windows (in process)
+
+Native-Windows PE patching is implemented and builds end-to-end against a real Windows `claude.exe`, but it is **unverified on real Windows hardware** — no patched binary has been executed on Windows yet. See [`WINDOWS.md`](./WINDOWS.md) for details.
+
 ## How do I use it?
 
 1. **Install the shim** - Click Install from the menubar or GUI page and select your system claude or another location if you want to be saner / use an alias.

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "kind": "patch",
+  "id": "fixtures_win_package",
+  "label": "Windows Spike Probe",
+  "description": "Minimal real length-changing patch proving the PE pipeline end-to-end.",
+  "packageVersion": "0.1.0",
+  "compatibility": { "claudeVersions": ["2.1.201"] },
+  "patch": {
+    "engine": "bun_graph_repack",
+    "targets": [
+      {
+        "sourceIdentity": {
+          "claudeVersion": "2.1.201",
+          "versionOutput": "2.1.201 (Claude Code)",
+          "sha256": "fb804ee019bfbb8d7e85abf965e528e53b5aa5a4e4ebc0f164139dc10a9e0320",
+          "sizeBytes": 241591968,
+          "platform": "win32",
+          "arch": "x64"
+        },
+        "requiredEngine": "bun_graph_repack",
+        "requiredBinaryFormat": "bun_standalone_pe64",
+        "modules": [
+          {
+            "path": "B:/~BUN/root/src/entrypoints/cli.js",
+            "contentSha256": "63154b978bb29a873e54fa8a622a5f5bce3b5cd3461cfa926cce010cabced1e2",
+            "contentLength": 18745538,
+            "operations": [
+              {
+                "opId": "win-spike-marker-2-1-201",
+                "label": "Insert a marker comment before the app-shell function",
+                "type": "insert_before",
+                "anchor": "function eKo(e){let t=OJe.c(78)",
+                "replacement": { "inline": "/*__WIN_SPIKE_MARKER__*/" }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
