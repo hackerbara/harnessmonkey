@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 from pathlib import Path
 
@@ -52,6 +54,28 @@ def test_path_lookup_ignores_managed_shim(tmp_path):
     assert is_managed_launcher_path(shim.resolve(), paths)
     found = discover_official_claude(config(), paths, {}, lambda _: str(shim))
     assert found is None
+
+
+def test_install_record_cached_source_used_when_path_only_finds_managed_shim(tmp_path):
+    paths = StatePaths(state_dir=tmp_path / ".harnessmonkey")
+    target = executable(tmp_path / "bin" / "claude")
+    cached = executable(paths.state_dir / "sources" / "digest" / "claude")
+    digest = hashlib.sha256(cached.read_bytes()).hexdigest()
+    paths.state_dir.mkdir(parents=True, exist_ok=True)
+    (paths.state_dir / "install-record.json").write_text(
+        json.dumps(
+            {
+                "owner": "HarnessMonkey managed shim",
+                "targetPath": str(target),
+                "previousSourceCachePath": str(cached),
+                "previousSourceSha256": digest,
+            }
+        )
+    )
+
+    found = discover_official_claude(config(), paths, {}, lambda _: str(target))
+
+    assert found == cached.resolve()
 
 
 def test_current_symlink_target_is_rejected(tmp_path):

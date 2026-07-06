@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "kind": "option",
+  "id": "threejs-sidebar-sidecar-local",
+  "label": "Three.js Sidebar Sidecar Local Runtime",
+  "description": "Enables the home-installed three.js WebGPU sidecar renderer for the threejs-sidebar-sidecar patch.",
+  "requiresPackages": [
+    "threejs-sidebar-sidecar"
+  ],
+  "option": {
+    "argv": [],
+    "env": {
+      "CLAUDEMONKEY_THREE_SIDECAR_ENABLE": {
+        "value": "1",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR": {
+        "value": "~/.harnessmonkey/patches/threejs-sidebar-sidecar/sidecar/run-sidecar.js",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_RENDERER": {
+        "value": "webgpu",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_SCENE": {
+        "value": "orbit-lab",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_ANSI": {
+        "value": "braille",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_FPS": {
+        "value": "8",
+        "allowOverrideProcessEnv": true
+      }
+    },
+    "conflictsWithArgv": [],
+    "conflictsWithOptions": [],
+    "conflictsWithEnv": []
+  }
+}

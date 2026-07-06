@@ -25,20 +25,52 @@ def patch_manifest(package_id: str, *, label: str | None = None) -> dict:
     }
 
 
+def option_manifest(option_id: str, *, label: str | None = None) -> dict:
+    return {
+        "schemaVersion": 1,
+        "kind": "option",
+        "id": option_id,
+        "label": label or option_id.replace("-", " ").title(),
+        "description": "Option package",
+        "option": {
+            "argv": [],
+            "env": {"EXAMPLE_OPTION": "1"},
+            "conflictsWithArgv": [],
+            "conflictsWithOptions": [],
+            "conflictsWithEnv": [],
+        },
+    }
+
+
 def write_patch_package(packages_root: Path, package_id: str) -> Path:
     package_dir = packages_root / package_id
     write_json(package_dir / "patch.json", patch_manifest(package_id))
     return package_dir
 
 
-def configure_install(monkeypatch, tmp_path: Path, package_ids=("alpha-patch", "beta-patch")):
+def write_option_package(options_root: Path, option_id: str) -> Path:
+    option_dir = options_root / option_id
+    write_json(option_dir / "option.json", option_manifest(option_id))
+    return option_dir
+
+
+def configure_install(
+    monkeypatch,
+    tmp_path: Path,
+    package_ids=("alpha-patch", "beta-patch"),
+    option_ids=(),
+):
     home = tmp_path / "home"
     monkeypatch.setenv("HOME", str(home))
     repo_root = tmp_path / "repo"
     packages_root = repo_root / "packages"
+    options_root = repo_root / "options"
     for package_id in package_ids:
         write_patch_package(packages_root, package_id)
+    for option_id in option_ids:
+        write_option_package(options_root, option_id)
     monkeypatch.setattr(cli, "_repo_packages_root", lambda: packages_root)
+    monkeypatch.setattr(cli, "_repo_options_root", lambda: options_root)
     return home, packages_root
 
 
@@ -49,12 +81,21 @@ def read_cli_json(capsys) -> dict:
 
 
 def test_install_copies_all_repo_packages_disabled(tmp_path, monkeypatch, capsys):
-    home, _packages_root = configure_install(monkeypatch, tmp_path)
+    home, _packages_root = configure_install(
+        monkeypatch, tmp_path, option_ids=("threejs-sidebar-sidecar-local",)
+    )
 
     assert main(["install", "--cli"]) == 0
 
     for package_id in ("alpha-patch", "beta-patch"):
         assert (home / ".harnessmonkey" / "patches" / package_id / "patch.json").exists()
+    assert (
+        home
+        / ".harnessmonkey"
+        / "options"
+        / "threejs-sidebar-sidecar-local"
+        / "option.json"
+    ).exists()
 
     capsys.readouterr()
     assert main(["list-patches", "--json"]) == 0
@@ -62,6 +103,11 @@ def test_install_copies_all_repo_packages_disabled(tmp_path, monkeypatch, capsys
     assert {record["id"]: record["enabled"] for record in records} == {
         "alpha-patch": False,
         "beta-patch": False,
+    }
+    assert main(["list-options", "--json"]) == 0
+    option_records = read_cli_json(capsys)["options"]
+    assert {record["id"]: record["enabled"] for record in option_records} == {
+        "threejs-sidebar-sidecar-local": False,
     }
 
 

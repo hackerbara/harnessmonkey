@@ -1,0 +1,1 @@
+V=Xd.jsx(__CodexThreeSidebarFallbackWindowV1,{scrollable:n,bottom:s,modal:i},"codex-threejs-sidebar-v1-fallback-window")

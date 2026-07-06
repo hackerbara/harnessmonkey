@@ -524,7 +524,9 @@ def test_build_json_invalid_v3_package_uses_machine_readable_error_code(
     assert payload["error"]["code"] == "package_manifest_invalid"
 
 
-def test_default_source_discovery_ignores_managed_shim_on_path(monkeypatch, tmp_path):
+def test_default_source_discovery_uses_cached_install_source_when_path_is_managed_shim(
+    monkeypatch, tmp_path
+):
     from harnessmonkey.cli import _discover_source
     from harnessmonkey.install import install_shim_transaction
 
@@ -543,8 +545,8 @@ def test_default_source_discovery_ignores_managed_shim_on_path(monkeypatch, tmp_
 
     discovered = _discover_source(None)
 
-    assert discovered is None
     raw = json.loads(record.read_text())
+    assert discovered == Path(raw["previousSourceCachePath"])
     assert raw["sourcePath"].endswith("versions/2.1.199")
 
 

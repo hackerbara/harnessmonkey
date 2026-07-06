@@ -1,0 +1,1 @@
+me=Xd.jsx(__CodexThreeSidebarMainWindowV1,{children:Xd.jsxs(B,{flexGrow:1,flexDirection:"row",overflow:"hidden",children:[Ee,pe]})},"codex-threejs-sidebar-v1-main-window")

@@ -1,0 +1,1 @@
+te=i!=null?Xd.jsx(__CodexThreeSidebarModalProviderV1,{rows:S,columns:Math.max(1,__tsCenterColumns(T,0)-2*$be),scrollRef:a??null,children:Xd.jsx(B,{flexDirection:"column",marginLeft:__tsW,width:__tsCenterColumns(T,0),paddingX:$be,children:i})}):null
