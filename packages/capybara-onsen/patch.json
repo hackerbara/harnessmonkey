@@ -4,7 +4,7 @@
   "id": "capybara-onsen",
   "label": "Capybara Onsen",
   "description": "A calming twilight Japanese onsen scene with two capybaras \u2014 baked half-block pixel art with 16-phase water/steam animation, drawn via the renderer's native ink-raw-ansi direct-draw path.",
-  "packageVersion": "1.5.0-pool-hop-note-injection",
+  "packageVersion": "1.7.0-full-column-pups",
   "compatibility": {
     "claudeVersions": [
       "2.1.201"
@@ -42,7 +42,7 @@
                 "oldRangeLength": 31,
                 "replacement": {
                   "path": "payloads/01-capy-onsen-context-frame-helpers-before-vko-2-1-201.js",
-                  "sha256": "b715e00e3359ad62f107429dd5a9c41d1004bf0586e2fe4f40abdf3a5a727e6b"
+                  "sha256": "7131d93b7cb3055994f06deb5b188e08aa2c8ede6fec74a57c8ca9369a3b1829"
                 },
                 "knownBehaviorChange": "Defines clipped 30-column visible side gutters, responsive right-gutter collapse at <=140 columns, and a center-column fde/useTerminalSize provider while reserving t4 for real modal/scrollbox overlays."
               },
@@ -106,7 +106,7 @@
                 "oldRangeLength": 364,
                 "replacement": {
                   "path": "payloads/05-capy-onsen-fullscreen-modal-center-fe-2-1-201.js",
-                  "sha256": "5cef9057dd54e31fe56d0c056893cae8c3d821f35af6746b97c2ec8b80d273c6"
+                  "sha256": "dc64238876eeb66e47c82efed17991c50ac60ffc8c14f6b9ba5d0049fc6eb09b"
                 },
                 "knownBehaviorChange": "Keeps modal/sub-agent style overlays in an explicit center-width box and narrowed real modal t4 context."
               },
@@ -189,6 +189,22 @@
                   "sha256": "1811c56c056d4b49fc97682968cd05dd4944165a8fa8d2741ec7fc2f13c6366e"
                 },
                 "knownBehaviorChange": "When the capybara hops into the pool, appends the pool-break note as a hidden-context attachment row (critical_system_reminder): invisible in the stock UI, surfaced naturally by whichever hidden-context package is installed, and delivered to next-turn model context as a system-reminder."
+              },
+              {
+                "opId": "capy-onsen-full-column-frame-ve-2-1-201",
+                "label": "Wrap the composed main/bottom/modal stack in full-height onsen walls",
+                "type": "replace_exact",
+                "exact": "ve=Xd.jsxs(NKo,{children:[me,de,fe]})",
+                "requireWithinRange": [
+                  "children:[me,de,fe]"
+                ],
+                "oldRangeSha256": "ed6e766901019f3f90eccbfa537054df28ff0106c1c419c9d5370455d1b873e2",
+                "oldRangeLength": 37,
+                "replacement": {
+                  "path": "payloads/11-capy-onsen-full-column-frame-ve-2-1-201.js",
+                  "sha256": "1eab12d698d031b840c8a1251c8e477358235d089a5b671dada3db86fb28b412"
+                },
+                "knownBehaviorChange": "Side walls span the full terminal column (transcript+prompt+footer) as single boxes; center content unchanged."
               }
             ]
           }
@@ -243,6 +259,11 @@
             "type": "module_must_contain",
             "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
             "value": "dWc(hn.useCallback((ft)=>kc((en)=>[...en,Dn({content:Hpr(ft),isMeta:!0})]),[kc]));"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "ve=Xd.jsxs(NKo,{children:[me,de,fe]})"
           }
         ],
         "postconditions": [
@@ -260,16 +281,6 @@
             "type": "module_must_contain",
             "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
             "value": "function __CodexCapyOnsenBottomStackV4"
-          },
-          {
-            "type": "module_must_contain",
-            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
-            "value": "codex-capy-onsen-v6-pool-right-responsive"
-          },
-          {
-            "type": "module_must_contain",
-            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
-            "value": "codex-capy-onsen-v6-right-responsive"
           },
           {
             "type": "module_must_contain",
@@ -345,6 +356,41 @@
             "type": "module_must_contain",
             "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
             "value": "function __coCropRunsV7"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __coPupsTick"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __coStampBand"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__coPupMaxSlots=3"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function Rc(){return sio()}"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "codex-capy-onsen-v8-frame"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "codex-capy-onsen-v8-left"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "codex-capy-onsen-v8-center"
           }
         ],
         "manualSmoke": {

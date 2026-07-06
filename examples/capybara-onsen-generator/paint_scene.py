@@ -560,6 +560,65 @@ def compose_right_jump_out(frame):
     return _compose_right_jump(JUMP_FRAMES_OUT, frame, 10)
 
 
+# --- subagent pups: tiny capybaras that join the pool while a Task-tool -------
+# subagent runs. Position-independent sprite canvases; the runtime stamps
+# them at per-slot offsets (see generate_package.py __coStampBand). '.' is
+# transparent (palette index 0 at compile time).
+
+PUP_W = 8               # canvas width: mask ink cols 1-6, splay ears reach 0/7
+PUP_H = 6               # canvas height in subrows == 3 cell rows
+PUP_SPLASH_W = 9        # splash canvas width (splash_cells spread 4 -> cols 0-8)
+PUP_TRANS_FRAMES = 4
+# (cx, eye_y) per slot: NW, NE, SW, SE. Canvas top = eye_y-4 (must be even and
+# >= ANIM_TOP -- cellrow alignment). SE is a baked reserve; runtime uses 3.
+PUP_SLOTS = [(6, 90), (24, 90), (6, 96), (24, 96)]
+
+PUP_SOAK = [            # settled pose: crown + eyes proud of the water
+    "cCCCCc",           # mask row 0 -> canvas row 3 (crown)
+    "CEAAEC",           # mask row 1 -> canvas row 4 (eyes)
+]
+PUP_HIGH = [            # arrival/departure pose: one extra row of body
+    "cCCCCc",
+    "CEAAEC",
+    ".cCCc.",           # mask row 2 -> canvas row 5 (chest, "riding high")
+]
+EAR_POSES_PUP = {       # (dx, dy) relative to mask origin; same flick rhythm
+    0: [(0, -1), (4, -1)],                       # rest
+    1: [(0, -2), (4, -2)],                       # lift
+    2: [(-1, -2), (1, -1), (3, -1), (5, -2)],    # splay (double-flick peak)
+}
+
+
+def _pup_render(mask, ear):
+    g = [['.'] * PUP_W for _ in range(PUP_H)]
+    for r, line in enumerate(mask):
+        for c, ch in enumerate(line):
+            if ch != '.':
+                g[3 + r][1 + c] = ch
+    for dx, dy in EAR_POSES_PUP[ear]:
+        x, y = 1 + dx, 3 + dy
+        if 0 <= y < PUP_H and 0 <= x < PUP_W:
+            g[y][x] = 'c'
+    return [''.join(r) for r in g]
+
+
+def pup_sprite_soak(ear):
+    return _pup_render(PUP_SOAK, ear)
+
+
+def pup_sprite_high(ear):
+    return _pup_render(PUP_HIGH, ear)
+
+
+def pup_sprite_splash(step):
+    """splash_cells reused verbatim on a local canvas: cx=4, waterline y=5."""
+    g = [['.'] * PUP_SPLASH_W for _ in range(PUP_H)]
+    for x, y, ch in ws.splash_cells(step, 4, 5):
+        if 0 <= y < PUP_H and 0 <= x < PUP_SPLASH_W:
+            g[y][x] = ch
+    return [''.join(r) for r in g]
+
+
 # --- composer-flank bands (8 rows, 1 python row = 1 terminal row, solid) -------
 
 def pool_left():

@@ -1,0 +1,1 @@
+ve=Xd.jsx(NKo,{children:Xd.jsx(__CodexCapyOnsenFrameV8,{main:me,bottom:de,modal:fe},"codex-capy-onsen-v8-frame")})

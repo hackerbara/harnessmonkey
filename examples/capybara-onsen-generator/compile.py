@@ -67,6 +67,11 @@ def pool_runs(rows: list[str]) -> list:
     return out
 
 
+def sprite_grid(rows: list[str]) -> list[list[int]]:
+    """Small sprite canvas -> palette-index grid. Index 0 ('.') = transparent."""
+    return [[IDX[ch] for ch in line] for line in rows]
+
+
 def _check_chars(name: str, rows: list[str]) -> None:
     for r, line in enumerate(rows):
         for x, ch in enumerate(line):
@@ -135,6 +140,29 @@ def main() -> None:
             _check_chars(f'{label}({i})', frame)
     assert len({tuple(f) for f in frames_r_sub}) >= 2, 'submerged loop has no motion'
 
+    # subagent pup sprites: runtime-composited overlays (see the art design
+    # spec) -- baked once, stamped per active slot at runtime.
+    assert scene.PUP_H % 2 == 0, 'pup canvas height must be whole cell rows'
+    for cx, eye_y in scene.PUP_SLOTS:
+        top = eye_y - 4
+        assert top >= scene.ANIM_TOP, f'pup slot ({cx},{eye_y}) leaks into the static band'
+        assert top % 2 == 0, f'pup slot ({cx},{eye_y}) canvas not cellrow-aligned'
+        assert top + scene.PUP_H <= H, f'pup slot ({cx},{eye_y}) canvas exceeds grid'
+        assert cx - 4 >= 0 and cx - 4 + scene.PUP_SPLASH_W <= W, \
+            f'pup slot ({cx},{eye_y}) footprint exceeds wall columns'
+    pup_soak = [scene.pup_sprite_soak(e) for e in range(3)]
+    pup_high = [scene.pup_sprite_high(e) for e in range(3)]
+    pup_splash = [scene.pup_sprite_splash(s) for s in (1, 2, 3)]
+    for name, frames, w in (
+        ('pupSoak', pup_soak, scene.PUP_W),
+        ('pupHigh', pup_high, scene.PUP_W),
+        ('pupSplash', pup_splash, scene.PUP_SPLASH_W),
+    ):
+        for i, rows in enumerate(frames):
+            assert len(rows) == scene.PUP_H, f'{name}({i}): expected {scene.PUP_H} rows'
+            assert all(len(r) == w for r in rows), f'{name}({i}): expected width {w}'
+            _check_chars(f'{name}({i})', rows)
+
     pool_l = scene.pool_left()
     pool_r = scene.pool_right()
     assert len(pool_l) == 8, f'pool_left(): expected 8 rows, got {len(pool_l)}'
@@ -171,6 +199,11 @@ def main() -> None:
             band_runs(frames_r_out[f], STATIC_CELL_ROWS, CELL_ROWS)
             for f in range(scene.TRANS_FRAMES)
         ],
+        'pupW': scene.PUP_W, 'pupH': scene.PUP_H, 'pupSplashW': scene.PUP_SPLASH_W,
+        'pupSlots': [list(s) for s in scene.PUP_SLOTS],
+        'pupSoak': [sprite_grid(f) for f in pup_soak],
+        'pupHigh': [sprite_grid(f) for f in pup_high],
+        'pupSplash': [sprite_grid(f) for f in pup_splash],
         'poolL': pool_runs(pool_l), 'poolR': pool_runs(pool_r),
     }
     payload = json.dumps(data, separators=(',', ':'))

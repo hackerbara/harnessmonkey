@@ -17,8 +17,12 @@ lantern, flicking its ears every few seconds. Steam drifts off the water.
 - **Animated regions** (bottom 22 cell rows only): the spout stream with
   descending pulses and impact spray, an expanding pool ripple, rising steam
   wisps, and the resting capybara's occasional double ear-flick.
-- Continues the pool water into the composer flanks so the bath reaches the very
-  bottom corners; the bottom chrome parent is tinted deep indigo `rgb(10,12,26)`. The right gutter collapses at terminal widths `<= 140` columns and returns at `>= 141`.
+- Each wall is a single full-height box spanning the entire terminal column,
+  top to bottom edge, so the pool basin, floating yuzu, and subagent pups are
+  never clipped (an earlier build capped wall height short of the bottom row
+  and cut them off). The bottom chrome parent is tinted deep indigo
+  `rgb(10,12,26)` so the seam between wall and chrome is invisible. The right
+  gutter collapses at terminal widths `<= 140` columns and returns at `>= 141`.
 
 ## How it works (rendering)
 
@@ -55,12 +59,13 @@ Shared discipline:
 
 ## Operations (seams)
 
-All ten are `replace_exact` inserts/replacements (non-overlapping). The first
-eight sit at the same full-frame app-shell anchors as `heraldic-dragons` — the
-two packages are **mutually exclusive**; the builder's byte-range overlap
+All eleven are `replace_exact` inserts/replacements (non-overlapping). The
+first eight sit at the same full-frame app-shell anchors as `heraldic-dragons` —
+the two packages are **mutually exclusive**; the builder's byte-range overlap
 check rejects co-application. The ninth and tenth are separate, small anchors
 elsewhere in the module (see Pool-hop trigger and Pool-hop note injection
-below):
+below). The eleventh is another full-frame app-shell anchor, wrapping the
+stack ops 3/4/5 compose into one full-height wall per side:
 
 1. `…-context-frame-helpers-before-vko` — scene components, clipped gutters,
    responsive right-gutter collapse, a center-column `fde` provider, and modal-only `t4` provider.
@@ -75,6 +80,7 @@ below):
 8. `…-fallback-window-v` — applies the same frame in the non-fullscreen fallback path.
 9. `…-assistant-text-hook` — feeds assistant message text to the pool-hop trigger just before the transcript-item switch; this is the only operation with a runtime side effect beyond layout.
 10. `…-note-sink-after-dwc` — registers the pool-break note-injection callback beside the existing session-name bridge in the REPL component (see Pool-hop note injection below).
+11. `…-full-column-frame-ve` — wraps the composed transcript+prompt+modal stack in one full-height wall per side; ops 3/4 now only provide center-column context.
 
 ## Pool-hop trigger
 
@@ -116,11 +122,33 @@ Mechanism: op 10
 (`…-note-sink-after-dwc`) registers a callback into a module-scope slot
 (`__coCapyNoteSink`) from inside the REPL component, the same bridge pattern
 the app already uses for its session-name file-watcher callback. The 180ms
-animation tick (outside React render) calls that sink at hop start with a
-fixed note string, wrapped in try/catch. The row is built with the app's own
+animation tick (outside React render) calls that sink at hop start, wrapped
+in try/catch, with a live-assembled note: a one-line ASCII scene postcard
+(soaking capybara plus one pup per active subagent) and a `with:` line naming
+the running subagents' Task descriptions, framed by a short fixed lead/close.
+The row is built with the app's own
 attachment factory (`ki`), so it persists to the session JSONL and survives
 `/resume` — intended, not a leak (composition contract locked by
 `tests/test_pool_hop_composition.py`).
+
+## Subagent pup capybaras
+
+Every running Task-tool subagent adds a small "pup" capybara soaking in the
+right-wall pool (max 3 at once in a slot grid; further agents queue FIFO for
+a free slot, no badge). Pups splash in when the subagent spawns, flick their
+ears in sync with the resident capybara, and hop out when the task
+completes, fails, or is killed -- an agent that finishes mid-arrival still
+plays its full arrival before departing. Detection reads the app's own
+AppState.tasks registry (records with type "local_agent" and status
+"running") via the store handle captured from our own wall component --
+zero additional patch operations; if the store is unavailable the feature
+degrades to zero pups. Sprites are runtime-composited overlays stamped onto
+the right-wall animation band (about 1KB of baked data total). When the
+right gutter is collapsed (terminal <= 140 columns) the pups are hidden
+with the rest of the right wall; state keeps tracking and they reappear on
+widen. Version fragility: the store getter and record shape are pinned by
+RUNTIME_IDENTITY_ANCHORS in generate_package.py, verified at generation
+time.
 
 ## Build pipeline
 
