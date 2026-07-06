@@ -1,5 +1,5 @@
 {
-  "description": "Suppresses selected recurring reminder/accounting attachments before generator telemetry and transcript row creation.",
+  "description": "Suppresses selected recurring reminder/accounting attachments and blank hook-success rows before generator telemetry and transcript row creation.",
   "id": "mute-reminders",
   "kind": "patch",
   "label": "Mute reminders",
@@ -32,7 +32,7 @@
                 "oldRangeLength": 602,
                 "replacement": {
                   "path": "payloads/filter-labels-before-_g-2.1.201.js",
-                  "sha256": "d28801c079ca327a96dba53eddd2d76f548cea1c90c655a149bbaac7deafcde9"
+                  "sha256": "4c07448a65e10cec1dff1b627ff15a814558a77d0db87beb1bf5ea0902ca77ee"
                 },
                 "knownBehaviorChange": "Selected reminder/accounting attachment generators return an empty list before their generator function and compute-duration telemetry run."
               },
@@ -56,6 +56,19 @@
                   "sha256": "eb960b1ee9429ca7fbe034e32ec444cd26d30996335575b6b918b5b544695131"
                 },
                 "knownBehaviorChange": "Denied attachment objects are filtered before active attachment telemetry and before ki(...) can create transcript rows."
+              },
+              {
+                "opId": "hook-success-message-filter-2-1-201",
+                "label": "Filter blank hook-success messages before hook message yield",
+                "type": "replace_exact",
+                "exact": "if(L.message)yield{message:L.message,...W};if(N++,L.systemMessage){",
+                "oldRangeSha256": "570dc6365c3351d06f7ff38ac95df819e654c5b73d95b7e5f4a0d59a99abb2a3",
+                "oldRangeLength": 67,
+                "replacement": {
+                  "path": "payloads/filter-hook-success-message-2.1.201.js",
+                  "sha256": "7eb0eb9ad8e50701f70b4e67e238359a0b37f9342c8a467b37dc54728c8b56b1"
+                },
+                "knownBehaviorChange": "Blank hook_success hook messages are suppressed before they are yielded as transcript attachment rows; contentful hook_success messages remain intact."
               }
             ],
             "path": "/$bunfs/root/src/entrypoints/cli.js"
@@ -91,6 +104,16 @@
             "type": "module_must_not_contain",
             "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
             "value": "async function*XYe(e,t,n,r,o,s,i,a){let l=await i5l(e,t,n,r,s,i,a);if(l.length===0)return;G(\"tengu_attachments\""
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "if(L.message&&!__codexUASDropAttachment(L.message.attachment))yield{message:L.message,...W};if(N++,L.systemMessage){"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "if(L.message)yield{message:L.message,...W};if(N++,L.systemMessage){"
           }
         ],
         "preconditions": [
@@ -103,6 +126,11 @@
             "type": "module_must_contain",
             "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
             "value": "async function*XYe(e,t,n,r,o,s,i,a){let l=await i5l(e,t,n,r,s,i,a);if(l.length===0)return;G(\"tengu_attachments\""
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "if(L.message)yield{message:L.message,...W};if(N++,L.systemMessage){"
           }
         ],
         "requiredBinaryFormat": "bun_standalone_macho64",

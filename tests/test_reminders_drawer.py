@@ -21,7 +21,7 @@ EXPECTED_SOURCE_SHA = "a0852d76afc47b30f5cb0b7625ec9a7714cb189f2eeef6c28c77e2be9
 EXPECTED_SOURCE_SIZE = 231708784
 EXPECTED_MODULE_SHA = "46db617a7b13c062fb31595f6244819b11f7cdc6e6fed8e2c3f74a27fb6da1bd"
 EXPECTED_MODULE_LENGTH = 18700756
-DENY_FAMILIES = ["todo_reminder", "task_reminder", "tool_search_usage_reminder", "token_usage", "total_tokens_reminder", "budget_usd", "output_token_usage"]
+DENY_FAMILIES = ["todo_reminder", "task_reminder", "tool_search_usage_reminder", "token_usage", "total_tokens_reminder", "budget_usd", "output_token_usage", "hook_success"]
 
 
 def _load_manifest():
@@ -42,11 +42,12 @@ def _build(tmp_path: Path, package_dirs: list[Path]):
     return build_patchset_v15(BuildRequestV15(source_path=LIVE_2_1_201, output_dir=tmp_path / "out", package_dirs=package_dirs, source_version="2.1.201", source_version_output="2.1.201 (Claude Code)", platform="darwin", arch="arm64"))
 
 
-def _rm_payload_texts() -> tuple[str, str, str]:
+def _rm_payload_texts() -> tuple[str, str, str, str]:
     wrapper = (PACKAGE_DIR / "payloads" / "rm-attachment-wrapper-deny-2.1.201.js").read_text(encoding="utf-8")
     xye = (PACKAGE_DIR / "payloads" / "rm-xye-runtime-filter-2.1.201.js").read_text(encoding="utf-8")
+    hook_gate = (PACKAGE_DIR / "payloads" / "rm-hook-success-message-filter-2.1.201.js").read_text(encoding="utf-8")
     panel = (PACKAGE_DIR / "payloads" / "rm-panel-real-target-2.1.201.js").read_text(encoding="utf-8")
-    return wrapper, xye, panel
+    return wrapper, xye, hook_gate, panel
 
 
 def test_reminders_manager_manifest_loads_package_model_with_valid_payload_hashes():
@@ -101,6 +102,11 @@ def test_reminders_manager_operation_anchors_are_unique_in_stock_module_dump():
             elif operation.type in {"insert_before", "insert_after"}:
                 assert operation.anchor is not None, operation.op_id
                 assert source.count(operation.anchor) == operation.expected_anchor_count, operation.op_id
+            elif operation.type == "replace_exact":
+                assert operation.exact is not None, operation.op_id
+                assert source.count(operation.exact) == 1, operation.op_id
+                assert operation.old_range_length == len(operation.exact.encode("utf-8")), operation.op_id
+                assert operation.old_range_sha256 == hashlib.sha256(operation.exact.encode("utf-8")).hexdigest(), operation.op_id
             else:
                 raise AssertionError(operation)
 
@@ -108,17 +114,19 @@ def test_reminders_manager_operation_anchors_are_unique_in_stock_module_dump():
 def test_reminders_manager_uses_spike_wrapper_and_real_target_panel():
     manifest = load_manifest_v2(PACKAGE_DIR)
     op_ids = {op.op_id for target in manifest.targets for module in target.modules for op in module.operations}
-    assert {"rm-attachment-wrapper-deny", "rm-xye-runtime-filter", "rm-panel-real-target"}.issubset(op_ids)
+    assert {"rm-attachment-wrapper-deny", "rm-xye-runtime-filter", "rm-hook-success-message-filter", "rm-panel-real-target"}.issubset(op_ids)
     assert "rm-register-footer-drawer" not in op_ids
     assert op_ids.isdisjoint({"rm-footer-target-append-2-1-199", "rm-wo-wrap-open-2-1-199", "rm-wo-wrap-close-2-1-199", "rm-footer-space-binding-2-1-199", "rm-bar-segment-2-1-199", "rm-overlay-default-2-1-199", "rm-overlay-bde-2-1-199"})
-    wrapper = (PACKAGE_DIR / "payloads" / "rm-attachment-wrapper-deny-2.1.201.js").read_text(encoding="utf-8")
-    panel = (PACKAGE_DIR / "payloads" / "rm-panel-real-target-2.1.201.js").read_text(encoding="utf-8")
+    wrapper, _, hook_gate, panel = _rm_payload_texts()
     assert 'function __codexRMWrapActions(e,t){if(t!=="reminders")return e' in wrapper
     assert "__CODEX_FOOTER_DRAWERS_V1__" not in wrapper
     assert "function __codexRMRegisterFooterDrawer" not in wrapper + panel
     assert ".register" not in wrapper + panel
     assert "function __codexRMPanel" in panel
     assert "__CODEX_REMINDERS_SELECTED_V1__===!0&&n.open" in panel
+    assert "Math.min(8" in wrapper
+    assert "!__codexRMDenyAttachment(L.message.attachment)" in hook_gate
+    assert "u<9" in panel
     assert "escape" not in panel.lower()
 
 def test_reminders_manager_declares_manual_smoke_for_the_drawer_ui():
@@ -129,43 +137,72 @@ def test_reminders_manager_declares_manual_smoke_for_the_drawer_ui():
 
 
 def test_reminders_manager_deny_payloads_define_expected_state_and_gate_functions():
-    wrapper, xye, panel = _rm_payload_texts()
+    wrapper, xye, hook_gate, panel = _rm_payload_texts()
     assert "function __codexRMState(){" in wrapper
     assert "function __codexRMDenyLabel(e)" in wrapper
     assert "function __codexRMDenyAttachment(e)" in wrapper
     assert "globalThis.__CODEX_REMINDERS_MANAGER_V1__" in wrapper
     assert "async function _g(e,t){" in wrapper
     assert "async function*XYe(e,t,n,r,o,s,i,a){" in xye
+    assert "!__codexRMDenyAttachment(L.message.attachment)" in hook_gate
     assert "function __codexRMPanel" in panel
     assert "function __codexRMWrapActions" in wrapper
     for family in DENY_FAMILIES:
         assert family in wrapper
+    assert '"hook success"' in wrapper
 
 
 def test_reminders_manager_deny_payloads_gate_before_telemetry_and_attachment_wrapping():
-    wrapper, xye, _ = _rm_payload_texts()
+    wrapper, xye, hook_gate, _ = _rm_payload_texts()
     assert wrapper.index("if(__codexRMDenyLabel(e))return[]") < wrapper.index("let n=Date.now()") < wrapper.index("let r=await t()") < wrapper.index('G("tengu_attachment_compute_duration"')
     assert xye.index("l=l.filter((c)=>!__codexRMDenyAttachment(c))") < xye.index("if(l.length===0)return") < xye.index('G("tengu_attachments"') < xye.index("yield ki(c,o)")
+    assert hook_gate.index("L.message") < hook_gate.index("!__codexRMDenyAttachment") < hook_gate.index("yield{message:L.message")
 
 
 def test_reminders_manager_deny_state_defaults_to_all_blocked_and_fails_closed():
-    wrapper, _, _ = _rm_payload_texts()
+    wrapper, _, _, _ = _rm_payload_texts()
     script = "\n".join([wrapper, r'''
 if (globalThis.__CODEX_REMINDERS_MANAGER_V1__ !== undefined) throw new Error("test setup: global should start undefined");
 let state = __codexRMState();
-for (const family of ["todo_reminder","task_reminder","tool_search_usage_reminder","token_usage","total_tokens_reminder","budget_usd","output_token_usage"]) {
+for (const family of ["todo_reminder","task_reminder","tool_search_usage_reminder","token_usage","total_tokens_reminder","budget_usd","output_token_usage","hook_success"]) {
   if (state.deny[family] !== true) throw new Error("expected default-deny for " + family);
 }
 if (!__codexRMDenyLabel("todo_reminders")) throw new Error("todo_reminders label should be denied by default");
 for (const type of ["todo_reminder","task_reminder","tool_search_usage_reminder","token_usage","total_tokens_reminder","budget_usd","output_token_usage"]) if (!__codexRMDenyAttachment({type})) throw new Error("type should be denied by default: " + type);
+if (!__codexRMDenyAttachment({type:"hook_success",content:""})) throw new Error("blank hook_success should be denied by default");
+if (__codexRMDenyAttachment({type:"hook_success",content:"OK"})) throw new Error("contentful hook_success should be kept");
 for (const type of ["hook_additional_context","critical_system_reminder","plan_mode","memory_update","diagnostics","queued_command"]) if (__codexRMDenyAttachment({type})) throw new Error("unrelated type should never be denied: " + type);
 '''])
     result = subprocess.run(["node", "-e", script], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     assert result.returncode == 0, result.stderr
 
 
+def test_reminders_manager_blank_hook_success_filter_respects_toggle():
+    wrapper, xye, _, _ = _rm_payload_texts()
+    script = "\n".join(["let telemetry=[];", "function G(name,payload){telemetry.push({name,payload})}", "function De(value){return JSON.stringify(value)}", "class jM extends Error {}", "function C(){}", "function sr(value){return value}", "function qo(value){return value}", "function He(){}", "function C6(){return undefined}", "let i5l;", "let ki;", wrapper, xye, r'''
+(async()=>{
+  if (!__codexRMDenyAttachment({type:"hook_success",content:""})) throw new Error("blank hook_success should be denied");
+  if (!__codexRMDenyAttachment({type:"hook_success",content:" \n\t"})) throw new Error("whitespace hook_success should be denied");
+  if (__codexRMDenyAttachment({type:"hook_success",content:"OK"})) throw new Error("contentful hook_success should be kept");
+  i5l = async () => [
+    {type:"hook_success",content:""},
+    {type:"hook_success",content:"OK"},
+    {type:"hook_additional_context",content:["keep"]}
+  ];
+  ki = (attachment) => ({type:"attachment", attachment});
+  let yielded = [];
+  for await (const row of XYe(null,null,null,null,null,null,null,null)) yielded.push(row.attachment);
+  if (yielded.map((item)=>item.type+":"+item.content).join(",") !== "hook_success:OK,hook_additional_context:keep") throw new Error("blank hook_success filter mismatch: " + JSON.stringify(yielded));
+  globalThis.__CODEX_REMINDERS_MANAGER_V1__.deny.hook_success = false;
+  if (__codexRMDenyAttachment({type:"hook_success",content:""})) throw new Error("blank hook_success should be kept after toggle");
+})().catch((err)=>{console.error(err.stack||err.message); process.exit(1)});
+'''])
+    result = subprocess.run(["node", "-e", script], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    assert result.returncode == 0, result.stderr
+
+
 def test_reminders_manager_shared_todo_reminders_label_gates_only_when_both_rows_denied():
-    wrapper, xye, _ = _rm_payload_texts()
+    wrapper, xye, _, _ = _rm_payload_texts()
     script = "\n".join(["let telemetry=[];", "function G(name,payload){telemetry.push({name,payload})}", "function De(value){return JSON.stringify(value)}", "class jM extends Error {}", "function C(){}", "function sr(value){return value}", "function qo(value){return value}", "function He(){}", "function C6(){return undefined}", "let i5l;", "let ki;", wrapper, xye, r'''
 (async()=>{
   let genRan = false;

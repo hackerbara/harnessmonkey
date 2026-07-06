@@ -1,0 +1,1 @@
+if(L.message&&!__codexUASDropAttachment(L.message.attachment))yield{message:L.message,...W};if(N++,L.systemMessage){

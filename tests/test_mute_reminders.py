@@ -37,10 +37,10 @@ DENIED_TYPES = [
     "total_tokens_reminder",
     "budget_usd",
     "output_token_usage",
+    "hook_success",
 ]
 
 KEPT_TYPES = [
-    "hook_success",
     "hook_additional_context",
     "hook_blocking_error",
     "hook_stopped_continuation",
@@ -87,14 +87,19 @@ def _target_module_text() -> str:
     return module.content.decode("utf-8")
 
 
-def _payloads() -> tuple[str, str, str]:
+def _payloads() -> tuple[str, str, str, str]:
     manifest = load_manifest_v2(PACKAGE_DIR)
     target = manifest.targets[0]
     module = target.modules[0]
-    payload_texts = []
+    payload_texts_by_id = {}
     for operation in module.operations:
-        payload_texts.append(load_payload_bytes(operation.replacement, PACKAGE_DIR).decode("utf-8"))
-    return payload_texts[0], payload_texts[1], "\n".join(payload_texts)
+        payload_texts_by_id[operation.op_id] = load_payload_bytes(operation.replacement, PACKAGE_DIR).decode("utf-8")
+    return (
+        payload_texts_by_id["_g-drop-denied-labels-2-1-201"],
+        payload_texts_by_id["xye-filter-before-ki-2-1-201"],
+        payload_texts_by_id["hook-success-message-filter-2-1-201"],
+        "\n".join(payload_texts_by_id.values()),
+    )
 
 
 def test_upstream_attachment_suppression_package_validates_against_real_2_1_199_source():
@@ -114,17 +119,19 @@ def test_upstream_attachment_suppression_package_validates_against_real_2_1_199_
     assert [item["opId"] for item in result["operationsResolved"]] == [
         "_g-drop-denied-labels-2-1-201",
         "xye-filter-before-ki-2-1-201",
+        "hook-success-message-filter-2-1-201",
     ]
     assert result["operationsResolved"][0]["delta"] > 0
     assert result["operationsResolved"][1]["delta"] > 0
 
 
 def test_upstream_attachment_suppression_payloads_encode_the_policy_and_keep_boundaries():
-    ug_payload, xye_payload, all_payload = _payloads()
+    ug_payload, xye_payload, hook_payload, all_payload = _payloads()
     assert "function __codexUASDropLabel(e)" in ug_payload
     assert "function __codexUASDropAttachment(e)" in ug_payload
     assert "async function _g(e,t)" in ug_payload
     assert "async function*XYe(e,t,n,r,o,s,i,a)" in xye_payload
+    assert "!__codexUASDropAttachment(L.message.attachment)" in hook_payload
     for label in DENIED_LABELS:
         assert label in ug_payload
     for attachment_type in DENIED_TYPES:
@@ -139,7 +146,7 @@ def test_upstream_attachment_suppression_payloads_encode_the_policy_and_keep_bou
 
 
 def test_upstream_attachment_suppression_gates_before_compute_telemetry_and_li_wrapping():
-    ug_payload, xye_payload, _ = _payloads()
+    ug_payload, xye_payload, hook_payload, _ = _payloads()
     label_guard = ug_payload.index("if(__codexUASDropLabel(e))return[]")
     start_timer = ug_payload.index("let n=Date.now()")
     await_generator = ug_payload.index("let r=await t()")
@@ -151,6 +158,7 @@ def test_upstream_attachment_suppression_gates_before_compute_telemetry_and_li_w
     hze_telemetry = xye_payload.index('G("tengu_attachments"')
     hze_li = xye_payload.index("yield ki(c,o)")
     assert hze_filter < hze_empty < hze_telemetry < hze_li
+    assert hook_payload.index("L.message") < hook_payload.index("!__codexUASDropAttachment") < hook_payload.index("yield{message:L.message")
 
 
 def test_upstream_attachment_suppression_manifest_targets_upstream_only():
@@ -168,11 +176,12 @@ def test_upstream_attachment_suppression_manifest_targets_upstream_only():
     assert target.source_identity.claude_version == "2.1.201"
     assert [module.path for module in target.modules] == [MODULE_PATH]
     operations = target.modules[0].operations
-    assert [operation.type for operation in operations] == ["replace_between", "replace_between"]
-    assert [operation.start_marker for operation in operations] == [
+    assert [operation.type for operation in operations] == ["replace_between", "replace_between", "replace_exact"]
+    assert [operation.start_marker for operation in operations[:2]] == [
         "async function _g(e,t){",
         "async function*XYe(e,t,n,r,o,s,i,a){",
     ]
+    assert operations[2].exact == "if(L.message)yield{message:L.message,...W};if(N++,L.systemMessage){"
     forbidden_values = [
         "function zsr(e){",
         "function Ypr(e){",
@@ -199,7 +208,7 @@ def test_no_direct_denied_family_li_construction_bypasses_hze_in_target_module()
 
 
 def test_upstream_attachment_suppression_fixture_blocks_denied_generators_telemetry_and_rows():
-    ug_payload, xye_payload, _ = _payloads()
+    ug_payload, xye_payload, _, _ = _payloads()
     script = "\n".join(
         [
             "let telemetry=[];",
@@ -223,6 +232,9 @@ def test_upstream_attachment_suppression_fixture_blocks_denied_generators_teleme
   for (const type of ["todo_reminder","task_reminder","tool_search_usage_reminder","token_usage","total_tokens_reminder","budget_usd","output_token_usage"]) {
     if (!__codexUASDropAttachment({type})) throw new Error("type should be denied: "+type);
   }
+  if (!__codexUASDropAttachment({type:"hook_success",content:""})) throw new Error("blank hook_success should be denied");
+  if (!__codexUASDropAttachment({type:"hook_success",content:" \n\t"})) throw new Error("whitespace hook_success should be denied");
+  if (__codexUASDropAttachment({type:"hook_success",content:"OK"})) throw new Error("contentful hook_success should be kept");
   for (const type of ["hook_additional_context","hook_blocking_error","critical_system_reminder","plan_mode","memory_update","diagnostics","queued_command"]) {
     if (__codexUASDropAttachment({type})) throw new Error("type should be kept: "+type);
   }
@@ -246,20 +258,23 @@ def test_upstream_attachment_suppression_fixture_blocks_denied_generators_teleme
   let wrapped=[];
   i5l=async()=>[
     {type:"todo_reminder",content:[]},
+    {type:"hook_success",content:""},
+    {type:"hook_success",content:"OK"},
     {type:"hook_additional_context",content:["keep"]},
     {type:"token_usage",used:1,total:10,remaining:9}
   ];
   ki=(attachment)=>{wrapped.push(attachment.type); return {type:"attachment",attachment}};
   let yielded=[];
   for await (const row of XYe(null,null,null,null,null,null,null,null)) yielded.push(row);
-  if (wrapped.join(",") !== "hook_additional_context") throw new Error("denied objects were wrapped by ki: "+wrapped.join(","));
-  if (yielded.length !== 1 || yielded[0].attachment.type !== "hook_additional_context") throw new Error("yield mismatch");
+  if (wrapped.join(",") !== "hook_success,hook_additional_context") throw new Error("denied objects were wrapped by ki: "+wrapped.join(","));
+  if (yielded.length !== 2 || yielded[0].attachment.type !== "hook_success" || yielded[0].attachment.content !== "OK" || yielded[1].attachment.type !== "hook_additional_context") throw new Error("yield mismatch");
   let event=telemetry.find((item)=>item.name==="tengu_attachments");
   if (!event) throw new Error("kept XYe attachment telemetry should remain");
   let types=event.payload.attachment_types;
   for (const deniedType of ["todo_reminder","token_usage"]) {
     if (types.includes(deniedType)) throw new Error("denied XYe type reached telemetry: "+deniedType);
   }
+  if (types.filter((type)=>type==="hook_success").length !== 1) throw new Error("only contentful hook_success should reach telemetry");
 })().catch((err)=>{console.error(err.stack||err.message); process.exit(1)});
 ''',
         ]

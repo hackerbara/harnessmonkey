@@ -3,7 +3,7 @@
   "kind": "patch",
   "id": "reminders-drawer",
   "label": "Reminders Drawer",
-  "description": "Runtime reminder/accounting suppression plus panel for real footer target wiring in Claude Code 2.1.201.",
+  "description": "Runtime reminder/accounting and blank hook-success suppression plus panel for real footer target wiring in Claude Code 2.1.201.",
   "packageVersion": "2.1.201-real-target.1",
   "compatibility": {
     "claudeVersions": [
@@ -42,7 +42,7 @@
                 "oldRangeLength": 602,
                 "replacement": {
                   "path": "payloads/rm-attachment-wrapper-deny-2.1.201.js",
-                  "sha256": "c4476007c7a14f53dc477b172eb99da09fd2c039842390ecf53e32a826730b2e"
+                  "sha256": "aa48b8cf7a5fe0fb278f2741803b510a260b985809ae50f9c8078ed566aaf84d"
                 },
                 "knownBehaviorChange": "Suppresses selected reminder/accounting attachment families and provides the spike-shaped real-target action wrapper."
               },
@@ -63,6 +63,19 @@
                 "knownBehaviorChange": "Filters selected reminder/accounting attachment objects before telemetry and transcript construction."
               },
               {
+                "opId": "rm-hook-success-message-filter",
+                "label": "Runtime filter for blank hook-success messages",
+                "type": "replace_exact",
+                "exact": "if(L.message)yield{message:L.message,...W};if(N++,L.systemMessage){",
+                "oldRangeSha256": "570dc6365c3351d06f7ff38ac95df819e654c5b73d95b7e5f4a0d59a99abb2a3",
+                "oldRangeLength": 67,
+                "replacement": {
+                  "path": "payloads/rm-hook-success-message-filter-2.1.201.js",
+                  "sha256": "76425a04449d211b107866a36fae25a4ccb6cb7ee3d94659ac5f63abebabdb5b"
+                },
+                "knownBehaviorChange": "Runtime reminders state can suppress blank hook_success hook messages before they are yielded as transcript attachment rows; contentful hook_success messages remain intact."
+              },
+              {
                 "opId": "rm-panel-real-target",
                 "label": "Provide Reminders panel for the real footer target overlay",
                 "type": "insert_before",
@@ -71,7 +84,7 @@
                 "insertOrder": 300,
                 "replacement": {
                   "path": "payloads/rm-panel-real-target-2.1.201.js",
-                  "sha256": "1fd642726e348512cf609c7a52d95477a59ecbf86b30fe3356f7b6a6378d1361"
+                  "sha256": "85581416b0833d2a616292fcd4dc644aabe386dd47e26199b4854639667fca18"
                 },
                 "knownBehaviorChange": "Renders Reminders only when the real reminders target is selected and its local UI state is open."
               }
@@ -105,6 +118,11 @@
             "type": "module_must_contain",
             "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
             "value": "function __codexRMPanel("
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "if(L.message&&!__codexRMDenyAttachment(L.message.attachment))yield{message:L.message,...W};if(N++,L.systemMessage){"
           }
         ],
         "manualSmoke": {
