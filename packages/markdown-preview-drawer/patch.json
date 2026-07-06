@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "kind": "patch",
+  "id": "markdown-preview-drawer",
+  "label": "Markdown Preview Drawer",
+  "description": "Intercepts local .md chat hyperlinks and previews the target file in a flat-content shared drawer-dock panel.",
+  "packageVersion": "2.1.201-real-target.1",
+  "compatibility": {
+    "claudeVersions": [
+      "2.1.201"
+    ],
+    "platforms": [
+      "darwin"
+    ],
+    "arches": [
+      "arm64"
+    ],
+    "notes": "Requires drawer-dock. Handles local file/relative .md hyperlinks only; web URLs and non-markdown links fall through to the stock opener."
+  },
+  "requiresPackages": [
+    "drawer-dock"
+  ],
+  "conflictsWithPackages": [],
+  "patch": {
+    "engine": "bun_graph_repack",
+    "targets": [
+      {
+        "sourceIdentity": {
+          "claudeVersion": "2.1.201",
+          "versionOutput": "2.1.201 (Claude Code)",
+          "sha256": "a0852d76afc47b30f5cb0b7625ec9a7714cb189f2eeef6c28c77e2be954fb7fd",
+          "sizeBytes": 231708784,
+          "platform": "darwin",
+          "arch": "arm64"
+        },
+        "requiredEngine": "bun_graph_repack",
+        "requiredBinaryFormat": "bun_standalone_macho64",
+        "modules": [
+          {
+            "path": "/$bunfs/root/src/entrypoints/cli.js",
+            "contentSha256": "46db617a7b13c062fb31595f6244819b11f7cdc6e6fed8e2c3f74a27fb6da1bd",
+            "contentLength": 18700756,
+            "operations": [
+              {
+                "opId": "mdlp-helpers-before-hyperlink-handler",
+                "label": "Add local markdown preview helpers before hyperlink handler wiring",
+                "type": "insert_before",
+                "anchor": "function Yuf(){",
+                "expectedAnchorCount": 1,
+                "insertOrder": 400,
+                "replacement": {
+                  "path": "payloads/01-md-link-preview-helpers.js",
+                  "sha256": "c7b87fff14085fedf9479c9b0e6ebde12666b56ce2d5cd1b1ab6b73b72d780f8"
+                },
+                "knownBehaviorChange": "Adds helper functions that resolve local .md hyperlink targets and populate the markdown preview drawer frame."
+              },
+              {
+                "opId": "mdlp-hijack-local-md-hyperlink-open",
+                "label": "Open local markdown links in preview drawer before system opener fallback",
+                "type": "replace_exact",
+                "exact": "function Juf(e){rPn(e)}",
+                "requireWithinRange": [],
+                "oldRangeSha256": "a3e61ef9f5e587d2e063a52b0122b8f2842cec3da2ead65b9919bcd9fbf5b52c",
+                "oldRangeLength": 23,
+                "replacement": {
+                  "path": "payloads/02-md-link-preview-hijack.js",
+                  "sha256": "13824c3baa24da0a821f24914982ec09af6781377c97a31f01bc81a92f41a42a"
+                },
+                "knownBehaviorChange": "Handles local .md hyperlink clicks in the drawer and preserves the existing opener for all other hyperlink targets."
+              },
+              {
+                "opId": "mdlp-panel-real-overlay",
+                "label": "Add markdown preview panel that uses footer drawer primitives",
+                "type": "insert_before",
+                "anchor": "var MXe,A_,Xd,GKo=2,pmr;",
+                "expectedAnchorCount": 1,
+                "insertOrder": 400,
+                "replacement": {
+                  "path": "payloads/03-md-link-preview-panel.js",
+                  "sha256": "071807d1c1dcaa74242dda4c5faa08b2530c6066d100f04de39b920920dd8cc0"
+                },
+                "knownBehaviorChange": "Adds the rendered panel and local footer-key handlers for markdown previews."
+              }
+            ]
+          }
+        ],
+        "preconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function Juf(e){rPn(e)}"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "onHyperlinkClick=Juf"
+          }
+        ],
+        "postconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexMDLPHandleHyperlink"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexMDLPPanel"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__CODEX_MD_LINK_PREVIEW_DRAWER_FRAME_V1__"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function Juf(e){if(typeof __codexMDLPHandleHyperlink"
+          }
+        ],
+        "manualSmoke": {
+          "required": true,
+          "reason": "The .md preview opens through the live terminal hyperlink click path and needs interactive chat smoke."
+        }
+      }
+    ]
+  }
+}

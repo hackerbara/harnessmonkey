@@ -206,6 +206,8 @@ def test_footer_drawers_owns_shared_boxed_drawer_display_primitives() -> None:
         "__codexFDBlockLineCount",
         "__codexFDVisibleBlocks",
         "__codexFDRenderBlockList",
+        "__codexFDVisibleLines",
+        "__codexFDRenderLineList",
         "__codexFDRenderDrawerPanel",
     ]:
         assert f"function {name}" in text
@@ -214,6 +216,13 @@ def test_footer_drawers_owns_shared_boxed_drawer_display_primitives() -> None:
     assert 'top:g' in text
     assert 'onWheel' in text
     assert 'bodyLines' in text
+    assert 'flatContent' in text
+
+
+def test_footer_drawers_overlay_optionally_mounts_markdown_preview_panel() -> None:
+    text = (FOOTER_DRAWERS / "payloads" / "01-real-target-helpers-and-overlay.js").read_text(encoding="utf-8")
+    assert 'typeof __codexMDLPPanel==="function"?Xd.jsx(__codexMDLPPanel,{})' in text
+    assert "children:[n,r,o,s,t]" in text
 
 
 def test_footer_drawers_operations_resolve_once_in_2_1_201_module_dump() -> None:

@@ -23,6 +23,7 @@ PACKAGE_DIRS = [
     ROOT / "packages" / "mute-reminders",
     ROOT / "packages" / "thinking-drawer",
     ROOT / "packages" / "drawer-dock",
+    ROOT / "packages" / "markdown-preview-drawer",
 ]
 
 

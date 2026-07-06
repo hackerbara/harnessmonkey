@@ -40,7 +40,7 @@
                 "oldRangeLength": 193,
                 "replacement": {
                   "path": "payloads/01-real-target-helpers-and-overlay.js",
-                  "sha256": "f3e4b59971356a1c40d2098f09d9ee0ee4bcb728e44d36a7ddf8970f87e5d5ec"
+                  "sha256": "03d38632120be1d75363e72619a3fc745bef74ba11817373e3cf5e4ea803d5ca"
                 },
                 "knownBehaviorChange": "Adds pure real-target drawer helper functions and composes drawer panels into the stock bottom overlay without a runtime registry."
               },

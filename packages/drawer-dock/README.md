@@ -11,8 +11,9 @@ Ship set:
 - `hidden-context-drawer`
 - `thinking-drawer`
 - `reminders-drawer`
+- `markdown-preview-drawer`
 
-Manual smoke is required. Verify down lands on the drawer toolbar once, left/right moves Hidden Context -> Thinking -> Reminders, enter/space opens, `x` closes, Escape does not close framework drawers, and only one drawer is open at a time.
+Manual smoke is required. Verify down lands on the drawer toolbar once, left/right moves Hidden Context -> Thinking -> Reminders, enter/space opens, `x` closes, Escape does not close framework drawers, only one toolbar drawer is open at a time, and Markdown Preview can overlay as a click-opened flat-content panel without a nested inner box.
 
 ## Real-target footer contract
 
