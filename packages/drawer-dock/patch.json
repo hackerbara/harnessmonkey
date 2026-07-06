@@ -40,7 +40,7 @@
                 "oldRangeLength": 193,
                 "replacement": {
                   "path": "payloads/01-real-target-helpers-and-overlay.js",
-                  "sha256": "c791ef1830e0359aaa463448bb917f9878762b62c0e5958187e2b02e43a91d04"
+                  "sha256": "f3e4b59971356a1c40d2098f09d9ee0ee4bcb728e44d36a7ddf8970f87e5d5ec"
                 },
                 "knownBehaviorChange": "Adds pure real-target drawer helper functions and composes drawer panels into the stock bottom overlay without a runtime registry."
               },
@@ -128,7 +128,7 @@
                 "oldRangeLength": 226,
                 "replacement": {
                   "path": "payloads/07-footer-space-binding.js",
-                  "sha256": "5d3b8a6c13b7070962983a84aa582f139ce6e388efce505be83c6cf6d6bf7ddb"
+                  "sha256": "5073499dbb2e5105a0d358991daf2819a6119fa7343d47c8e28e4e7fb3bf5915"
                 },
                 "knownBehaviorChange": "Maps space to footer:openSelected without changing Escape."
               },

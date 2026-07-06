@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 from __future__ import annotations
 
 import hashlib
@@ -6,10 +7,10 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from tests.harnessmonkey_binary import claude_version_path
 
 from harnessmonkey.builder_v15 import BuildRequestV15, build_patchset_v15, load_manifest_v2
 from harnessmonkey.payloads import load_payload_bytes
-from tests.harnessmonkey_binary import claude_version_path
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = "/$bunfs/root/src/entrypoints/cli.js"
@@ -179,14 +180,41 @@ def test_footer_drawers_target_list_has_real_drawer_targets_before_stock_targets
 
 def test_footer_drawers_action_wrapper_routes_by_real_selected_target() -> None:
     text = (FOOTER_DRAWERS / "payloads" / "01-real-target-helpers-and-overlay.js").read_text(encoding="utf-8")
+    bindings = (FOOTER_DRAWERS / "payloads" / "07-footer-space-binding.js").read_text(encoding="utf-8")
     assert 'function __codexFDWrapRealTargetActions(e,t,n,r)' in text
+    assert 'function __codexFDScrollStep(){return 6}' in text
     assert 't==="hiddenContext"' in text
     assert 't==="thinking"' in text
     assert 't==="reminders"&&typeof __codexRMWrapActions==="function"' in text
     assert 'footer:clearSelection' in text
     assert 'footer:close' in text
+    assert 'footer:jumpTop' in text
+    assert 'g:"footer:jumpTop"' in bindings
+    assert '"shift+g":"footer:jumpTop"' in bindings
+    assert '__codexFDHiddenContextScroll(-3,r)' not in text
+    assert '__codexFDHiddenContextScroll(3,r)' not in text
+    assert 'children:"  up/down or mouse wheel scroll | x closes"' in text
     assert 'openId' not in text
     assert 'hoverId' not in text
+
+
+def test_footer_drawers_owns_shared_boxed_drawer_display_primitives() -> None:
+    text = (FOOTER_DRAWERS / "payloads" / "01-real-target-helpers-and-overlay.js").read_text(encoding="utf-8")
+    for name in [
+        "__codexFDViewport",
+        "__codexFDClampScroll",
+        "__codexFDBlockLineCount",
+        "__codexFDVisibleBlocks",
+        "__codexFDRenderBlockList",
+        "__codexFDRenderDrawerPanel",
+    ]:
+        assert f"function {name}" in text
+    assert 'borderStyle:"single"' in text
+    assert 'borderStyle:"round"' in text
+    assert 'top:g' in text
+    assert 'onWheel' in text
+    assert 'bodyLines' in text
+
 
 def test_footer_drawers_operations_resolve_once_in_2_1_201_module_dump() -> None:
     source = _module_dump_or_skip()
@@ -321,7 +349,6 @@ def test_reminders_conflicts_with_matching_uas_fixture_when_framework_is_present
     assert report.status == "failed"
     assert report.failureReason is not None
     assert "patch_conflict:package_conflict:mute-reminders-fixture:reminders-drawer" in report.failureReason
-import itertools
 
 
 def _build_packages(tmp_path: Path, name: str, packages: list[Path]):

@@ -1,5 +1,8 @@
+# ruff: noqa: E501
 import hashlib
 import json
+import subprocess
+import textwrap
 from pathlib import Path
 
 from tests.harnessmonkey_binary import claude_version_path
@@ -71,7 +74,40 @@ def test_hidden_context_drawer_real_target_panel_keeps_x_only_contract() -> None
     panel = read_rel("payloads/17-panel-real-target.js")
     assert "function __codexNCHCPanel" in panel
     assert "__CODEX_HIDDEN_CONTEXT_DRAWER_SELECTED_V13__===!0&&globalThis.__CODEX_HIDDEN_CONTEXT_DRAWER_OPEN_V13__===!0" in panel
-    assert "x closes" in panel
+    assert "__codexFDRenderDrawerPanel" in panel
+    assert 'title:"Hidden Context"' in panel
+    assert 'borderColor:"warning"' in panel
+    assert 'scrollGlobal:"__CODEX_HIDDEN_CONTEXT_DRAWER_SCROLL_V13__"' in panel
+    assert "x closes" not in panel
+    assert "lines??" not in panel
+
+
+def test_hidden_context_frame_exposes_shared_render_blocks() -> None:
+    helper = read_rel("payloads/01-projection-helpers-before-ypr-2.1.201.js")
+    script = textwrap.dedent(
+        f"""
+        {helper}
+        function assert(cond, msg) {{ if (!cond) throw new Error(msg); }}
+        const frame = __codexNCHCDrawerFrameFromList([{{
+          type: 'attachment',
+          uuid: 'row-1',
+          timestamp: '2026-07-05T12:34:56Z',
+          attachment: {{
+            type: 'hook_additional_context',
+            hookName: 'PostToolUse',
+            content: ['first hidden line', 'second hidden line']
+          }}
+        }}]);
+        assert(Array.isArray(frame.blocks), 'hidden context frame should expose render blocks');
+        assert(frame.blocks.length === 1, 'one hidden context row should produce one box');
+        assert(frame.blocks[0].header.includes('PostToolUse hook'), 'block header should preserve hidden context label');
+        assert(frame.blocks[0].header.includes('attachment:hook_additional_context'), 'block header should preserve source label');
+        assert(frame.blocks[0].bodyLines.some(line => line.includes('first hidden line')), 'block body should contain projection text');
+        assert(frame.lineCount >= frame.blocks[0].bodyLines.length + 3, 'lineCount should include box border/header overhead');
+        """
+    )
+    subprocess.run(["node", "-e", script], check=True)
+
 
 def test_hidden_context_operations_match_source_and_payload_hashes() -> None:
     source = MODULE_DUMP.read_text(encoding="utf-8") if MODULE_DUMP.exists() else None
@@ -97,5 +133,6 @@ def test_hidden_context_operations_match_source_and_payload_hashes() -> None:
 if __name__ == "__main__":
     test_hidden_context_drawer_targets_claude_2_1_201()
     test_hidden_context_drawer_real_target_panel_keeps_x_only_contract()
+    test_hidden_context_frame_exposes_shared_render_blocks()
     test_hidden_context_operations_match_source_and_payload_hashes()
     print("hidden-context drawer package checks passed")

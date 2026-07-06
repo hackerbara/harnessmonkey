@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 from __future__ import annotations
 
 import hashlib
@@ -6,10 +7,10 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from tests.harnessmonkey_binary import claude_bin_candidates, claude_version_path
 
 from harnessmonkey.builder_v15 import ValidationRequestV15, load_manifest_v2, validate_package
 from harnessmonkey.payloads import load_payload_bytes
-from tests.harnessmonkey_binary import claude_bin_candidates, claude_version_path
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_DIRS = [
@@ -175,8 +176,7 @@ if (projected[1].content !== "[model context] Task reminder: task tools have not
     result = subprocess.run(
         ["node", "-e", script],
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         check=False,
     )
     assert result.returncode == 0, result.stderr
@@ -217,7 +217,7 @@ def test_hidden_context_drawer_package_uses_footer_overlay_without_global_ijo_ca
     assert "function __codexNCHCPanel" in postcondition_values
 
 
-def test_hidden_context_drawer_scroll_step_is_three_for_keyboard_and_mouse():
+def test_hidden_context_drawer_scroll_step_is_six_for_keyboard_and_mouse_with_top_jump():
     package_dir = ROOT / "packages" / "drawer-dock"
     keyboard_payload = (
         package_dir / "payloads" / "01-real-target-helpers-and-overlay.js"
@@ -226,14 +226,19 @@ def test_hidden_context_drawer_scroll_step_is_three_for_keyboard_and_mouse():
         ROOT / "packages" / "hidden-context-drawer" / "payloads" / "17-panel-real-target.js"
     ).read_text()
 
-    # Keyboard up/down scrolling now goes through the shared drawer-dock
-    # helper, which is invoked with an explicit +/-3 step.
-    assert "__codexFDHiddenContextScroll(-3,r)" in keyboard_payload
-    assert "__codexFDHiddenContextScroll(3,r)" in keyboard_payload
-    assert "__codexFDHiddenContextScroll(-1,r)" not in keyboard_payload
-    assert "__codexFDHiddenContextScroll(1,r)" not in keyboard_payload
-    # Mouse-wheel scrolling remains on the hidden-context-drawer panel itself.
-    assert "l.deltaY>0?3:-3" in overlay_payload
+    # Keyboard and mouse-wheel scrolling now share the faster 6-line drawer step.
+    assert "function __codexFDScrollStep(){return 6}" in keyboard_payload
+    assert "__codexFDHiddenContextScroll(-__codexFDScrollStep(),r)" in keyboard_payload
+    assert "__codexFDHiddenContextScroll(__codexFDScrollStep(),r)" in keyboard_payload
+    assert "footer:jumpTop" in keyboard_payload
+    assert "__codexFDHiddenContextJumpTop(r)" in keyboard_payload
+    assert "__codexFDHiddenContextScroll(-3,r)" not in keyboard_payload
+    assert "__codexFDHiddenContextScroll(3,r)" not in keyboard_payload
+    # Mouse-wheel scrolling is now owned by the shared drawer renderer; the
+    # Hidden Context panel delegates to that renderer.
+    assert "__codexFDRenderDrawerPanel" in overlay_payload
+    assert "onWheel" in keyboard_payload
+    assert "m.deltaY>0?d:-d" in keyboard_payload
 
 
 def test_hidden_context_drawer_footer_flashes_blue_until_selection_clears():
@@ -269,7 +274,7 @@ def test_hidden_context_drawer_footer_x_closes_and_enter_opens():
     open_close_payload = (
         footer_drawers_dir / "payloads" / "01-real-target-helpers-and-overlay.js"
     ).read_text()
-    # The panel itself still owns the "x closes" hint text.
+    # The shared footer renderer owns the "x closes" hint text.
     overlay_payload = (
         package_dir / "payloads" / "17-panel-real-target.js"
     ).read_text()
@@ -295,7 +300,8 @@ def test_hidden_context_drawer_footer_x_closes_and_enter_opens():
         'o["footer:clearSelection"]=()=>{if(t==="hiddenContext"&&r?.hiddenOpen)return!1;'
         in open_close_payload
     )
-    assert "x closes" in overlay_payload
+    assert "__codexFDRenderDrawerPanel" in overlay_payload
+    assert "x closes" in open_close_payload
     assert "ctrl+. closes" not in combined_hc_and_framework_text
     assert "ctrl+esc closes" not in combined_hc_and_framework_text
     assert "| esc closes" not in combined_hc_and_framework_text
@@ -312,10 +318,12 @@ def test_hidden_context_drawer_payload_avoids_utf8_separator_mojibake_and_uses_w
 
     assert b"\xc2\xb7" not in helper_payload
     assert b"\\xB7" in helper_payload
+    footer_payload = (ROOT / "packages" / "drawer-dock" / "payloads" / "01-real-target-helpers-and-overlay.js").read_text()
     assert 'borderColor:"warning"' in overlay_payload
-    assert "borderText:{content:` Hidden Context " in overlay_payload
+    assert 'title:"Hidden Context"' in overlay_payload
+    assert "borderText:{content:` ${n} ${p} `" in footer_payload
     assert 'lineKinds' in helper_payload.decode()
-    assert 'color:n?.lineKinds?.[a+c]==="header"?"warning":void 0' in overlay_payload
+    assert 'blocks' in helper_payload.decode()
     assert 'color:d===""?void 0:"warning"' not in overlay_payload
     assert 'Xd.jsx(v,{bold:!0,children:["Hidden Context  "' not in overlay_payload
 
@@ -441,8 +449,7 @@ if (!(frame.tokenCount > 0)) throw new Error("expected non-zero token count");
     result = subprocess.run(
         ["node", "-e", script],
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         check=False,
     )
     assert result.returncode == 0, result.stderr

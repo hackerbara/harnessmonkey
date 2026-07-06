@@ -39,7 +39,7 @@
                 "insertOrder": 100,
                 "replacement": {
                   "path": "payloads/01-projection-helpers-before-ypr-2.1.201.js",
-                  "sha256": "bce39c0f93ad2fd25e947b483137011a5aed408f5981093d7b9b0d6d716d9328"
+                  "sha256": "01c9ceee668b103dad33697b28c7b61a413bdfca727cf06edb5775d88f973db8"
                 },
                 "knownBehaviorChange": "Publishes full projection-list drawer frame before hidden-context filtering without framework registry mutation."
               },
@@ -66,7 +66,7 @@
                 "insertOrder": 100,
                 "replacement": {
                   "path": "payloads/17-panel-real-target.js",
-                  "sha256": "a8f4cc08c7c89d3124f3136a3880f7af0a63c5e7c0e24331cac4451ae5e6d5d0"
+                  "sha256": "1893b2d58c576cbb4fa2d06717c49358bc77d162a07e28cd28a5abdc68dd01ef"
                 },
                 "knownBehaviorChange": "Renders Hidden Context only when the real hiddenContext target is selected and locally open."
               }

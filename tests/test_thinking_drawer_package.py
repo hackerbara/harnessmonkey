@@ -1,7 +1,8 @@
+# ruff: noqa: E501
 import hashlib
 import json
-import sys
 import subprocess
+import sys
 import textwrap
 from pathlib import Path
 
@@ -35,8 +36,8 @@ def source_module_text() -> str | None:
     if not LIVE_2_1_201.exists():
         return None
     sys.path.insert(0, str(ROOT / "src"))
-    from harnessmonkey.macho import find_macho_layout
     from harnessmonkey.bun_graph import parse_bun_section
+    from harnessmonkey.macho import find_macho_layout
 
     raw = LIVE_2_1_201.read_bytes()
     layout = find_macho_layout(raw)
@@ -183,7 +184,7 @@ def test_thinking_text_drawer_is_real_target_panel_extension() -> None:
     panel = read_rel("payloads/17-panel-real-target.js")
     assert "function __codexTTDPanel" in panel
     assert "__CODEX_THINKING_TEXT_DRAWER_SELECTED_V1__===!0&&globalThis.__CODEX_THINKING_TEXT_DRAWER_OPEN_V1__===!0" in panel
-    assert "x closes" in panel
+    assert "__codexFDRenderDrawerPanel" in panel
     assert "escape" not in panel.lower()
 
 def test_thinking_text_drawer_panel_and_docs_remain_display_only() -> None:
@@ -200,7 +201,7 @@ def test_thinking_text_drawer_panel_and_docs_remain_display_only() -> None:
     assert "available:()=>!0" not in text
     assert "__CODEX_THINKING_TEXT_DRAWER_FRAME_V1__" in text
     assert "__CODEX_THINKING_TEXT_DRAWER_OPEN_V1__" in text
-    assert "x closes" in panel
+    assert "__codexFDRenderDrawerPanel" in panel
     assert "escape" not in panel.lower()
 
 def test_thinking_text_drawer_collectors_cover_required_sources() -> None:
@@ -259,6 +260,44 @@ def test_helper_fixture_merge_and_actual_text_only_sources() -> None:
     )
     subprocess.run(["node", "-e", script], check=True)
 
+
+
+def test_thinking_text_drawer_panel_uses_shared_boxed_drawer_renderer() -> None:
+    panel = read_rel("payloads/17-panel-real-target.js")
+    helpers = read_rel("payloads/01-thinking-text-helpers.js")
+
+    assert "blocks:" in helpers
+    assert "__codexTTDFrameBlocks" in helpers
+    assert "function __codexTTDVisibleBlocks" not in helpers
+    assert "__codexFDRenderDrawerPanel" in panel
+    assert 'title:"Thinking"' in panel
+    assert 'borderColor:"permission"' in panel
+    assert 'scrollGlobal:"__CODEX_THINKING_TEXT_DRAWER_SCROLL_V1__"' in panel
+    assert 'viewportGlobal:"__CODEX_THINKING_TEXT_DRAWER_VIEWPORT_V1__"' in panel
+    assert 'borderStyle:"single"' not in panel
+    assert "__codexTTDVisibleBlocks" not in panel
+    assert "r?.lines??" not in panel
+
+
+def test_helper_fixture_exposes_box_blocks_for_rendering() -> None:
+    helper = read_rel("payloads/01-thinking-text-helpers.js")
+    script = textwrap.dedent(
+        f"""
+        {helper}
+        function assert(cond, msg) {{ if (!cond) throw new Error(msg); }}
+        globalThis.__CODEX_THINKING_TEXT_DRAWER_FRAME_V1__ = undefined;
+        __codexTTDRecordStructuredThinking({{thinking:`alpha\nbeta`, messageId:'m1', blockHash:'h1'}});
+        __codexTTDRecordSalvagedThinking({{thinking:'gamma', messageId:'m2', blockHash:'h2'}});
+        const frame = __codexTTDDrawerFrame();
+        assert(Array.isArray(frame.blocks), 'drawer frame should expose render blocks');
+        assert(frame.blocks.length === 2, 'two thinking entries should produce two boxes');
+        assert(frame.blocks.every(b => Array.isArray(b.bodyLines)), 'blocks should carry body lines');
+        assert(frame.blocks.every(b => b.header && b.key), 'blocks should carry stable key and header');
+        assert(frame.lineCount >= frame.blocks.reduce((n, b) => n + b.bodyLines.length + 3, 0), 'lineCount should include box border/header overhead');
+        assert(frame.blocks[0].bodyLines.length === 1, 'chunked body should normalize wrapped text lines');
+        """
+    )
+    subprocess.run(["node", "-e", script], check=True)
 
 def test_secondary_marker_strings_are_not_drawer_content() -> None:
     text = payloads_text()
@@ -394,7 +433,7 @@ if __name__ == "__main__":
     test_thinking_text_drawer_is_v3_patch_package()
     test_thinking_text_drawer_payload_ui_literals_are_ascii_safe()
     test_thinking_text_drawer_targets_claude_2_1_201()
-    test_thinking_text_drawer_is_thin_footer_registrant()
+    test_thinking_text_drawer_is_real_target_panel_extension()
     test_thinking_text_drawer_panel_and_docs_remain_display_only()
     test_thinking_text_drawer_collectors_cover_required_sources()
     test_structured_collection_runs_before_ctrl_o_guard()
@@ -403,4 +442,4 @@ if __name__ == "__main__":
     test_manifest_operations_match_source_and_payload_hashes()
     test_operations_stay_out_of_request_and_persistence_surfaces()
     test_helper_fixture_review_regressions()
-    print("thinking-text drawer package checks passed")
+    print("thinking drawer package checks passed")
