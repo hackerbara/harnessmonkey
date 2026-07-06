@@ -57,6 +57,8 @@ def test_capybara_onsen_manifest_shape_and_pins():
         "capy-onsen-qde-bottom-stack-ee-2-1-201",
         "capy-onsen-qde-overlay-center-te-2-1-201",
         "capy-onsen-fallback-window-v-2-1-201",
+        "capy-onsen-assistant-text-hook-2-1-201",
+        "capy-onsen-note-sink-after-dwc-2-1-201",
     ]
     for op in operations:
         assert op["type"] == "replace_exact"
@@ -94,9 +96,22 @@ def test_capybara_onsen_payloads_match_hashes_and_are_mojibake_safe():
     assert '"ink-raw-ansi"' in joined
     assert "String.fromCharCode(9600)" in joined       # half-block generated at runtime
     assert "String.fromCharCode(27)" in joined         # ESC generated at runtime
-    assert "%__coPhases),180)" in joined               # water/steam animation tick, 180ms
+    assert "%__coPhases)},180)" in joined              # tick: soak state machine + phase advance
+    assert "function __coOnAssistantText" in joined
+    assert "function __coSoakTick" in joined
+    assert "function __coRightAnim" in joined
+    assert "__coAnimRSub" in joined
+    assert "__coTransInR" in joined
+    assert "__coTransOutR" in joined
+    assert "__coSoakHoldTicks=39" in joined
+    assert "hopping in the pool" in joined
     assert "codex-capy-onsen-v4-main-window" in joined
     assert "codex-capy-onsen-v4-bottom-stack" in joined
+    assert "__coCapyNoteSink" in joined
+    assert "Enjoy the break, CapyClaude~" in joined
+    # note is appended as a hidden-context attachment row, not an isMeta user row
+    assert 'ki({type:"critical_system_reminder",content:ft})' in joined
+    assert 'Dn({content:[{type:"text",text:ft}],isMeta:!0})' not in joined
 
 
 def test_capybara_onsen_center_provider_memoizes_context_values():

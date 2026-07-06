@@ -83,6 +83,33 @@ def ear_pose(phase):
     return {6: 1, 7: 2, 8: 1}.get(phase, 0)
 
 
+def soak_ripple_cells(phase, cx, y):
+    """Concentric surface ripple around the soaking head. Pure in (phase, cx, y)."""
+    p = phase % CYCLE
+    r = 2 + (p % 4)
+    cells = []
+    for dx in (-r, r):
+        cells.append((cx + dx, y, 'F' if p % 2 else 'V'))
+    if p >= 4:
+        for dx in (-(r + 2), r + 2):
+            cells.append((cx + dx, y, 'V'))
+    return cells
+
+
+def splash_cells(step, cx, y):
+    """One-shot splash burst for the jump transitions. step 0 = no splash;
+    larger steps = wider/taller burst. Pure in (step, cx, y)."""
+    if step <= 0:
+        return []
+    spread = min(step + 1, 5)
+    cells = []
+    for k in range(-spread, spread + 1):
+        yy = y - 1 - (spread - abs(k)) // 2
+        ch = 'u' if abs(k) <= 1 else ('U' if k % 2 else 'F')
+        cells.append((cx + k, yy, ch))
+    return cells
+
+
 # --- determinism / liveliness asserts (reinstating what v13 dropped) ----------
 assert stream_cells(3, 17, 66, 75) == stream_cells(3, 17, 66, 75)
 assert stream_cells(0, 17, 66, 75) != stream_cells(1, 17, 66, 75)
@@ -90,3 +117,7 @@ assert steam_cells(2, [8, 25], 83, 58) == steam_cells(2, [8, 25], 83, 58)
 assert steam_cells(0, [8, 25], 83, 58) != steam_cells(4, [8, 25], 83, 58)
 assert all(y >= 58 for _, y, _ in steam_cells(5, [8, 25], 83, 58))
 assert [ear_pose(p) for p in range(PHASES)].count(0) == 13
+assert soak_ripple_cells(5, 9, 84) == soak_ripple_cells(5, 9, 84)
+assert soak_ripple_cells(0, 9, 84) != soak_ripple_cells(2, 9, 84)
+assert splash_cells(0, 9, 84) == []
+assert all(56 <= y <= 85 for _, y, _ in splash_cells(5, 9, 84))

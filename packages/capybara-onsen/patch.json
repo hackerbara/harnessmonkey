@@ -4,7 +4,7 @@
   "id": "capybara-onsen",
   "label": "Capybara Onsen",
   "description": "A calming twilight Japanese onsen scene with two capybaras \u2014 baked half-block pixel art with 16-phase water/steam animation, drawn via the renderer's native ink-raw-ansi direct-draw path.",
-  "packageVersion": "1.4.4-footer-drawer-overlay-fix",
+  "packageVersion": "1.5.0-pool-hop-note-injection",
   "compatibility": {
     "claudeVersions": [
       "2.1.201"
@@ -42,7 +42,7 @@
                 "oldRangeLength": 31,
                 "replacement": {
                   "path": "payloads/01-capy-onsen-context-frame-helpers-before-vko-2-1-201.js",
-                  "sha256": "a99bea96b172e3f7ccec74c29dd465a9390b48927dd1e5dfdd2198ec4312afbb"
+                  "sha256": "b715e00e3359ad62f107429dd5a9c41d1004bf0586e2fe4f40abdf3a5a727e6b"
                 },
                 "knownBehaviorChange": "Defines clipped 30-column visible side gutters, responsive right-gutter collapse at <=140 columns, and a center-column fde/useTerminalSize provider while reserving t4 for real modal/scrollbox overlays."
               },
@@ -157,6 +157,38 @@
                   "sha256": "267b8862c4d2feea9ded820d0b51454e91a19b60677f33accbf4240b9da587f1"
                 },
                 "knownBehaviorChange": "Uses the same physical/contextual main and bottom frame in the non-fullscreen fallback path."
+              },
+              {
+                "opId": "capy-onsen-assistant-text-hook-2-1-201",
+                "label": "Feed assistant message text to the pool-hop trigger before the transcript-item switch",
+                "type": "replace_exact",
+                "exact": "S=_===void 0?!1:_;",
+                "requireWithinRange": [
+                  "S=_===void 0?!1:_;"
+                ],
+                "oldRangeSha256": "f2378195c0316877ec99a34aadac074b187b178b8652a2590897918147afcd21",
+                "oldRangeLength": 18,
+                "replacement": {
+                  "path": "payloads/09-capy-onsen-assistant-text-hook-2-1-201.js",
+                  "sha256": "6c90a84e44f8f04d42490e74b86650c4a53a99d2d719fc908b296ee4b177a8c8"
+                },
+                "knownBehaviorChange": "Scans assistant message text for pool-hop trigger phrases; scene-only side effect, message rendering unchanged."
+              },
+              {
+                "opId": "capy-onsen-note-sink-after-dwc-2-1-201",
+                "label": "Register pool-hop note sink beside the session-name bridge in the REPL component",
+                "type": "replace_exact",
+                "exact": "dWc(hn.useCallback((ft)=>kc((en)=>[...en,Dn({content:Hpr(ft),isMeta:!0})]),[kc]));",
+                "requireWithinRange": [
+                  "dWc(hn.useCallback"
+                ],
+                "oldRangeSha256": "27dff047e88095819edb2169245519dfb3968df835cd47bd8223dd206c3c005a",
+                "oldRangeLength": 82,
+                "replacement": {
+                  "path": "payloads/10-capy-onsen-note-sink-after-dwc-2-1-201.js",
+                  "sha256": "1811c56c056d4b49fc97682968cd05dd4944165a8fa8d2741ec7fc2f13c6366e"
+                },
+                "knownBehaviorChange": "When the capybara hops into the pool, appends the pool-break note as a hidden-context attachment row (critical_system_reminder): invisible in the stock UI, surfaced naturally by whichever hidden-context package is installed, and delivered to next-turn model context as a system-reminder."
               }
             ]
           }
@@ -201,6 +233,16 @@
             "type": "module_must_contain",
             "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
             "value": "V=Xd.jsxs(Xd.Fragment,{children:[n,s,i]})"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "S=_===void 0?!1:_;"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "dWc(hn.useCallback((ft)=>kc((en)=>[...en,Dn({content:Hpr(ft),isMeta:!0})]),[kc]));"
           }
         ],
         "postconditions": [

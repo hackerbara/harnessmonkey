@@ -1,0 +1,1 @@
+S=_===void 0?!1:_;n.type==="assistant"&&typeof __coOnAssistantText==="function"&&__coOnAssistantText(n);

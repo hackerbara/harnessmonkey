@@ -55,9 +55,12 @@ Shared discipline:
 
 ## Operations (seams)
 
-All eight are `replace_exact` inserts/replacements (non-overlapping), at the same
-full-frame app-shell anchors as `heraldic-dragons` — the two packages are **mutually
-exclusive**; the builder's byte-range overlap check rejects co-application:
+All ten are `replace_exact` inserts/replacements (non-overlapping). The first
+eight sit at the same full-frame app-shell anchors as `heraldic-dragons` — the
+two packages are **mutually exclusive**; the builder's byte-range overlap
+check rejects co-application. The ninth and tenth are separate, small anchors
+elsewhere in the module (see Pool-hop trigger and Pool-hop note injection
+below):
 
 1. `…-context-frame-helpers-before-vko` — scene components, clipped gutters,
    responsive right-gutter collapse, a center-column `fde` provider, and modal-only `t4` provider.
@@ -70,6 +73,54 @@ exclusive**; the builder's byte-range overlap check rejects co-application:
 6. `…-qde-bottom-stack-ee` — constrains the terminal-scroll-region prompt/footer path without clipping footer overlays.
 7. `…-qde-overlay-center-te` — constrains the terminal-scroll-region overlay path.
 8. `…-fallback-window-v` — applies the same frame in the non-fullscreen fallback path.
+9. `…-assistant-text-hook` — feeds assistant message text to the pool-hop trigger just before the transcript-item switch; this is the only operation with a runtime side effect beyond layout.
+10. `…-note-sink-after-dwc` — registers the pool-break note-injection callback beside the existing session-name bridge in the REPL component (see Pool-hop note injection below).
+
+## Pool-hop trigger
+
+Say a trigger phrase (case-insensitive substring match) in an assistant message
+and the right capybara hops into the pool for a soak (the left wall is
+unaffected -- the two walls are independent, per `paint_scene.py`): it plays a
+jump-in transition immediately (starts on the next tick, no phase-alignment
+wait -- a small steam discontinuity at takeoff is accepted for
+responsiveness), then holds a soaking pose for ~7s (39 ticks at 180ms) and
+climbs back out immediately once the hold expires (no phase-alignment wait on
+exit either -- another small steam discontinuity accepted at that boundary),
+then plays a jump-out transition back to its normal resting animation; the
+landing itself stays phase-aligned/seamless (transOut always resets to phase
+0). The
+phrases are `TRIGGER_PHRASES` in `generate_package.py` — edit and regenerate to
+change them. Retriggers during an active soak are queued and play out as
+additional complete hop-in/soak/hop-out cycles rather than being dropped or
+restarting the current one. Streaming-safe: growth of the same messages
+text is deduped against the highest trigger count already seen for that
+message id, so partial-token streaming re-renders never enqueue duplicate
+hops. Op 09
+(`…-assistant-text-hook`) is the text hook that feeds message text into this
+state machine; it is wrapped in try/catch and never affects message rendering.
+
+## Pool-hop note injection
+
+When a hop actually starts (queue consumed, not merely queued), a short note
+is appended to the conversation as a **hidden-context attachment row**
+(`ki({type:"critical_system_reminder",content:…})`). It is invisible in the
+stock UI (the `Ypr` gate filters hidden attachment types before the row
+renderer), surfaced automatically by whichever hidden-context surfacing
+package is installed — `hidden-context-inline` shows it inline in
+chat, `hidden-context-drawer` routes it to the footer drawer, both through
+their existing `critical_system_reminder` projection branch with no
+capybara-specific code — and, this is the point, included in the model's own
+context on its next turn wrapped in `<system-reminder>` tags, so it "knows"
+it just got a pool break. One note per hop, including queued repeat hops.
+Mechanism: op 10
+(`…-note-sink-after-dwc`) registers a callback into a module-scope slot
+(`__coCapyNoteSink`) from inside the REPL component, the same bridge pattern
+the app already uses for its session-name file-watcher callback. The 180ms
+animation tick (outside React render) calls that sink at hop start with a
+fixed note string, wrapped in try/catch. The row is built with the app's own
+attachment factory (`ki`), so it persists to the session JSONL and survives
+`/resume` — intended, not a leak (composition contract locked by
+`tests/test_pool_hop_composition.py`).
 
 ## Build pipeline
 

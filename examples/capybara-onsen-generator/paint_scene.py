@@ -422,6 +422,144 @@ def compose_right(phase):
     return [''.join(r) for r in g]
 
 
+# --- pool-hop: submerged pose + jump transitions (all inside the anim band) ---
+
+TRANS_FRAMES = 6
+
+# The eyes row (y83) must stay gap-free ('.'-free): the splash draw-order fix
+# in _compose_right_jump relies on the head mask fully overwriting any splash
+# cells at the eye columns, so a '.' there would let splash bleed through.
+CAPY_R_SOAK = [        # crown + eyes just proud of the water (WATERLINE=84)
+    ".cCCCCCCCc.",     # y82 crown
+    "cCEACCCAECc",     # y83 eyes at the surface
+]
+CAPY_R_SOAK_ORIGIN = (4, 82)
+
+EAR_POSES_SOAK = {     # absolute (x, y) cells; same flick rhythm as EAR_POSES
+    0: [(7, 80), (7, 81), (11, 80), (11, 81)],
+    1: [(7, 79), (7, 80), (11, 79), (11, 80)],
+    2: [(6, 79), (7, 80), (12, 79), (11, 80)],
+}
+
+JUMP_FRAMES_IN = [     # (body_origin | None for soak pose, splash_step)
+    ((1, 70), 0),      # crouch on the shelf
+    ((2, 64), 0),      # spring
+    ((3, 68), 1),      # arc out over the water
+    ((4, 76), 3),      # impact -- body clipped at the waterline
+    (None, 4),         # under: soak pose + big burst
+    (None, 2),         # settle: soak pose + fading burst
+]
+# Runtime phase choreography baked by JUMP_FRAMES_OUT (see _compose_right_jump
+# and __coSoakTick in generate_package.py). Both the hop-in and the climb-out
+# are un-gated by design (user-requested responsiveness tradeoffs -- the jump
+# motion masks the steam discontinuity at each boundary):
+#   dry loop (whatever phase it happened to be at) -> transIn bakes its own
+#   fixed steam phases 0..5, independent of the interrupted dry phase (small
+#   accepted discontinuity here) -> soak enters at animRSub[6], continuing
+#   7, 8, 9, ... for as many ticks as __coSoakHoldTicks holds (soak-exit
+#   phase is not gated either) -> transOut bakes its own fixed steam phases
+#   10..15, independent of the interrupted soak phase (another small accepted
+#   discontinuity here; final frame forced to compose_right(15)) -> dry
+#   resumes at animR[0].
+# The two internal handoffs that stay seamless by construction: transIn's
+# last frame (phase 5) into soak's first frame (phase 6), and transOut's
+# forced final frame (phase 15) into the resumed dry loop (phase 0) -- the
+# landing. Only the two transition *entry* boundaries (dry->transIn,
+# soak->transOut) carry an accepted steam jump.
+JUMP_FRAMES_OUT = [
+    (None, 1),         # gather
+    ((4, 76), 3),      # burst upward
+    ((3, 68), 2),      # arc back to the shelf
+    ((2, 64), 0),      # apex
+    ((1, 70), 0),      # land crouch
+    ((1, 68), 0),      # settle into the rest pose
+]
+
+
+def stamp_clip(g, ox, oy, rows, y_max):
+    """stamp(), but skip every subrow at or below y_max (waterline clipping)."""
+    for r, line in enumerate(rows):
+        if oy + r >= y_max:
+            break
+        for c, ch in enumerate(line):
+            if ch != '.':
+                put(g, ox + c, oy + r, ch)
+
+
+def capy_right_soak(g, pose):
+    stamp(g, *CAPY_R_SOAK_ORIGIN, CAPY_R_SOAK)
+    for x, y in EAR_POSES_SOAK[pose]:
+        put(g, x, y, 'c')
+
+
+def _capy_right_at(g, ox, oy):
+    """The dry body mask stamped at an arbitrary origin, clipped at the
+    waterline, with rest-pose ears shifted by the same offset."""
+    stamp_clip(g, ox, oy, CAPY_R_BODY, WATERLINE)
+    dx, dy = ox - CAPY_R_ORIGIN[0], oy - CAPY_R_ORIGIN[1]
+    for x, y in EAR_POSES[0]:
+        if y + dy < WATERLINE:
+            put(g, x + dx, y + dy, 'c')
+
+
+def _base_right_grid_no_capy():
+    g = fresh()
+    sky(g, 'R')
+    bamboo(g, 'R')
+    rocks_right(g)
+    lantern(g)
+    pool(g, 'R')
+    yuzu_right(g)
+    return g
+
+
+def compose_right_submerged(phase):
+    g = _base_right_grid_no_capy()
+    capy_right_soak(g, ws.ear_pose(phase))
+    _overlay_on_water(g, ws.soak_ripple_cells(phase, 9, WATERLINE))
+    _overlay(g, ws.steam_cells(phase, STEAM_SEEDS_R, WATERLINE - 1, STEAM_CEIL))
+    return [''.join(r) for r in g]
+
+
+def _compose_right_jump(table, frame, phase0):
+    """Compose one jump-transition frame. `phase0` offsets the steam/ripple
+    phase so consecutive rendered frames across state handoffs (dry <-> jump
+    <-> soak) always advance by consecutive phases -- see the runtime phase
+    choreography comment above JUMP_FRAMES_OUT."""
+    origin, splash = table[frame]
+    g = _base_right_grid_no_capy()
+    if origin is None:
+        # splash first, then stamp the soak pose on top: the head/eyes redraw
+        # over the splash so the eye-clobber (splash_cells is centered on the
+        # same column as the soak pose's eyes) cannot recur, while any splash
+        # cells above the head remain visible as spray -- see
+        # test_jump_in_starts_dry_and_ends_submerged and
+        # test_jump_impact_frames_show_splash
+        _overlay(g, ws.splash_cells(splash, 9, WATERLINE))
+        capy_right_soak(g, 0)
+        _overlay_on_water(g, ws.soak_ripple_cells(phase0 + frame, 9, WATERLINE))
+    else:
+        # body first, splash after: spray renders in front of the body/rock,
+        # the physically correct occlusion at impact
+        _capy_right_at(g, *origin)
+        _overlay(g, ws.splash_cells(splash, 9, WATERLINE))
+    _overlay(g, ws.steam_cells(phase0 + frame, STEAM_SEEDS_R, WATERLINE - 1, STEAM_CEIL))
+    return [''.join(r) for r in g]
+
+
+def compose_right_jump_in(frame):
+    return _compose_right_jump(JUMP_FRAMES_IN, frame, 0)
+
+
+def compose_right_jump_out(frame):
+    if frame == TRANS_FRAMES - 1:
+        # The runtime now lands on __coAnimR[0] immediately AFTER this final
+        # out-frame, and the steam phase must run ...14, 15, then wrap to 0 --
+        # so this frame is compose_right(15), not compose_right(0).
+        return compose_right(15)
+    return _compose_right_jump(JUMP_FRAMES_OUT, frame, 10)
+
+
 # --- composer-flank bands (8 rows, 1 python row = 1 terminal row, solid) -------
 
 def pool_left():

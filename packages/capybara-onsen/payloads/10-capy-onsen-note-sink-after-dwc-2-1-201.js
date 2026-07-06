@@ -1,0 +1,1 @@
+dWc(hn.useCallback((ft)=>kc((en)=>[...en,Dn({content:Hpr(ft),isMeta:!0})]),[kc]));__coCapyNoteSink=hn.useCallback((ft)=>kc((en)=>[...en,ki({type:"critical_system_reminder",content:ft})]),[kc]);

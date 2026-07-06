@@ -116,6 +116,25 @@ def main() -> None:
             f'{scene.PHASES} phases, got {distinct}'
         )
 
+    # pool-hop frame sets: submerged idle loop + one-shot jump transitions
+    assert scene.TRANS_FRAMES == 6, f'expected TRANS_FRAMES == 6, got {scene.TRANS_FRAMES}'
+    frames_r_sub = [scene.compose_right_submerged(p) for p in range(scene.PHASES)]
+    frames_r_in = [scene.compose_right_jump_in(f) for f in range(scene.TRANS_FRAMES)]
+    frames_r_out = [scene.compose_right_jump_out(f) for f in range(scene.TRANS_FRAMES)]
+    assert frames_r_sub[0] == scene.compose_right_submerged(0), (
+        'compose_right_submerged not deterministic'
+    )
+    for label, frames in (
+        ('submerged', frames_r_sub),
+        ('jump_in', frames_r_in),
+        ('jump_out', frames_r_out),
+    ):
+        for i, frame in enumerate(frames):
+            assert len(frame) == H, f'{label}[{i}]: expected {H} rows, got {len(frame)}'
+            _check_v8_rule(f'right/{label}', static_r, i, frame)
+            _check_chars(f'{label}({i})', frame)
+    assert len({tuple(f) for f in frames_r_sub}) >= 2, 'submerged loop has no motion'
+
     pool_l = scene.pool_left()
     pool_r = scene.pool_right()
     assert len(pool_l) == 8, f'pool_left(): expected 8 rows, got {len(pool_l)}'
@@ -141,6 +160,17 @@ def main() -> None:
         'phases': scene.PHASES,
         'staticL': static_l_runs, 'staticR': static_r_runs,
         'animL': anim_l_runs, 'animR': anim_r_runs,
+        'animRSub': [
+            band_runs(frames_r_sub[p], STATIC_CELL_ROWS, CELL_ROWS) for p in range(scene.PHASES)
+        ],
+        'transInR': [
+            band_runs(frames_r_in[f], STATIC_CELL_ROWS, CELL_ROWS)
+            for f in range(scene.TRANS_FRAMES)
+        ],
+        'transOutR': [
+            band_runs(frames_r_out[f], STATIC_CELL_ROWS, CELL_ROWS)
+            for f in range(scene.TRANS_FRAMES)
+        ],
         'poolL': pool_runs(pool_l), 'poolR': pool_runs(pool_r),
     }
     payload = json.dumps(data, separators=(',', ':'))
