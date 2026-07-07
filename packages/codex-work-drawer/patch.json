@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "kind": "patch",
+  "id": "codex-work-drawer",
+  "label": "Codex Work Drawer",
+  "description": "Passive footer drawer that renders recent Codex assistant messages from local Codex companion state and session JSONL.",
+  "packageVersion": "2.1.201-real-target.1",
+  "compatibility": {
+    "claudeVersions": [
+      "2.1.201"
+    ],
+    "platforms": [
+      "darwin"
+    ],
+    "arches": [
+      "arm64"
+    ],
+    "notes": "Requires drawer-dock. Passive local observer only; does not modify Codex plugin output or feed observed output back into Claude context."
+  },
+  "patch": {
+    "engine": "bun_graph_repack",
+    "targets": [
+      {
+        "sourceIdentity": {
+          "claudeVersion": "2.1.201",
+          "versionOutput": "2.1.201 (Claude Code)",
+          "sha256": "a0852d76afc47b30f5cb0b7625ec9a7714cb189f2eeef6c28c77e2be954fb7fd",
+          "sizeBytes": 231708784,
+          "platform": "darwin",
+          "arch": "arm64"
+        },
+        "requiredEngine": "bun_graph_repack",
+        "requiredBinaryFormat": "bun_standalone_macho64",
+        "modules": [
+          {
+            "path": "/$bunfs/root/src/entrypoints/cli.js",
+            "contentSha256": "46db617a7b13c062fb31595f6244819b11f7cdc6e6fed8e2c3f74a27fb6da1bd",
+            "contentLength": 18700756,
+            "operations": [
+              {
+                "opId": "codex-work-helpers-before-ypr",
+                "label": "Insert Codex Work passive observer helpers",
+                "type": "insert_before",
+                "anchor": "function Ypr(e){",
+                "expectedAnchorCount": 1,
+                "insertOrder": 300,
+                "replacement": {
+                  "path": "payloads/01-codex-work-helpers.js",
+                  "sha256": "7bfcb3ef73dde68f50c9215ed698457c664f6ab7037a960e9713981249b34fc4"
+                },
+                "knownBehaviorChange": "Adds display-only helpers that read local Codex companion job state and Codex session JSONL."
+              },
+              {
+                "opId": "codex-work-panel-real-target",
+                "label": "Provide Codex Work panel for the real footer target overlay",
+                "type": "insert_before",
+                "anchor": "var MXe,A_,Xd,GKo=2,pmr;",
+                "expectedAnchorCount": 1,
+                "insertOrder": 350,
+                "replacement": {
+                  "path": "payloads/17-panel-real-target.js",
+                  "sha256": "500159e964db08709eab574ff07308a00c7a595b60427f3cdd4768886402ed10"
+                },
+                "knownBehaviorChange": "Renders Codex Work only when the real codexWork target is selected and locally open."
+              }
+            ]
+          }
+        ],
+        "preconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function Ypr(e){"
+          }
+        ],
+        "postconditions": [
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexCWDFrame"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __codexCWDPanel"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "Codex Work"
+          }
+        ],
+        "manualSmoke": {
+          "required": true,
+          "reason": "Codex Work drawer requires interactive footer selection and live/local Codex job artifacts."
+        }
+      }
+    ]
+  },
+  "requiresPackages": [
+    "drawer-dock"
+  ]
+}

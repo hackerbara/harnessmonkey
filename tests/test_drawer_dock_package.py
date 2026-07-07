@@ -20,6 +20,7 @@ FOOTER_DRAWERS = ROOT / "packages" / "drawer-dock"
 HC = ROOT / "packages" / "hidden-context-drawer"
 THINKING = ROOT / "packages" / "thinking-drawer"
 REMINDERS = ROOT / "packages" / "reminders-drawer"
+CODEX = ROOT / "packages" / "codex-work-drawer"
 CAPY = ROOT / "packages" / "capybara-onsen"
 DRAGONS = ROOT / "packages" / "heraldic-dragons"
 
@@ -138,7 +139,7 @@ def test_footer_drawers_payloads_have_no_registry_or_descriptor_contract() -> No
     assert "function __codexFDWrapRealTargetActions" in text
     assert 't==="reminders"&&typeof __codexRMWrapActions==="function"' in text
     assert '__codexHiddenContextFrame?.visible&&"hiddenContext"' in text
-    assert "FDdrawerBars=[FDhBar,FDtBar,FDrBar].filter(Boolean)" in text
+    assert "FDdrawerBars=[FDhBar,FDtBar,FDcBar,FDrBar].filter(Boolean)" in text
 
 def _run_footer_drawers_payload_js(body: str) -> dict:
     bootstrap = FOOTER_DRAWERS / "payloads" / "01-bootstrap-and-overlay.js"
@@ -165,9 +166,11 @@ def test_footer_drawers_status_bar_uses_explicit_real_target_segments() -> None:
     assert 'footerSelection==="hiddenContext"' in text
     assert 'footerSelection==="thinking"' in text
     assert 'footerSelection==="reminders"' in text
+    assert 'footerSelection==="codexWork"' in text
     assert '"Hidden Context "' in text
     assert '"Thinking"' in text
     assert '"Reminders"' in text
+    assert '"Codex Work "' in text
     assert '" (enter)"' in text
     assert '" \\u2192"' in text
     assert "FDbar" not in text
@@ -175,7 +178,7 @@ def test_footer_drawers_status_bar_uses_explicit_real_target_segments() -> None:
 
 def test_footer_drawers_target_list_has_real_drawer_targets_before_stock_targets() -> None:
     text = (FOOTER_DRAWERS / "payloads" / "03-real-drawer-targets.js").read_text(encoding="utf-8")
-    assert text.index('__codexHiddenContextFrame?.visible&&"hiddenContext"') < text.index('typeof __codexTTDEnsure==="function"&&"thinking"') < text.index('typeof __codexRMState==="function"&&"reminders"') < text.index('Ui&&"tasks"')
+    assert text.index('__codexHiddenContextFrame?.visible&&"hiddenContext"') < text.index('typeof __codexTTDEnsure==="function"&&"thinking"') < text.index('FDcWs?.visible&&"codexWork"') < text.index('typeof __codexRMState==="function"&&"reminders"') < text.index('Ui&&"tasks"')
     assert '"drawers"' not in text
 
 def test_footer_drawers_action_wrapper_routes_by_real_selected_target() -> None:
@@ -186,6 +189,8 @@ def test_footer_drawers_action_wrapper_routes_by_real_selected_target() -> None:
     assert 't==="hiddenContext"' in text
     assert 't==="thinking"' in text
     assert 't==="reminders"&&typeof __codexRMWrapActions==="function"' in text
+    assert 't==="codexWork"' in text
+    assert 'typeof __codexCWDKey==="function"&&__codexCWDKey("up")' in text
     assert 'footer:clearSelection' in text
     assert 'footer:close' in text
     assert 'footer:jumpTop' in text
@@ -222,7 +227,8 @@ def test_footer_drawers_owns_shared_boxed_drawer_display_primitives() -> None:
 def test_footer_drawers_overlay_optionally_mounts_markdown_preview_panel() -> None:
     text = (FOOTER_DRAWERS / "payloads" / "01-real-target-helpers-and-overlay.js").read_text(encoding="utf-8")
     assert 'typeof __codexMDLPPanel==="function"?Xd.jsx(__codexMDLPPanel,{})' in text
-    assert "children:[n,r,o,s,t]" in text
+    assert 'typeof __codexCWDPanel==="function"?Xd.jsx(__codexCWDPanel,{})' in text
+    assert "children:[n,r,s,o,i,t]" in text
 
 
 def test_footer_drawers_operations_resolve_once_in_2_1_201_module_dump() -> None:
@@ -251,7 +257,7 @@ def test_footer_drawers_operations_resolve_once_in_2_1_201_module_dump() -> None
 
 
 def test_thin_drawers_require_footer_drawers_after_migration() -> None:
-    for package_dir in [HC, THINKING, REMINDERS]:
+    for package_dir in [HC, THINKING, REMINDERS, CODEX]:
         manifest = load_manifest_v2(package_dir)
         assert "drawer-dock" in manifest.requires_packages, package_dir
 
@@ -385,6 +391,8 @@ def _build_packages(tmp_path: Path, name: str, packages: list[Path]):
         ("framework-hidden-reminders", [FOOTER_DRAWERS, HC, REMINDERS]),
         ("framework-thinking-reminders", [FOOTER_DRAWERS, THINKING, REMINDERS]),
         ("framework-all", [FOOTER_DRAWERS, HC, THINKING, REMINDERS]),
+        ("framework-codex", [FOOTER_DRAWERS, CODEX]),
+        ("framework-all-codex", [FOOTER_DRAWERS, HC, THINKING, CODEX, REMINDERS]),
         # Regression coverage for the capybara-onsen + hidden-context-drawer Enter-to-open
         # bug: capybara-onsen's responsive frame re-provides the app's real fde/t4 React
         # contexts around the composer/footer subtree that hosts drawer-dock' Enter
@@ -409,7 +417,7 @@ def test_footer_drawers_successful_composition_matrix(tmp_path, name, packages) 
     assert report.manualSmoke["status"] == "bypassed"
     assert report.activationEligible is True
     assert report.enabledPatches == [p.name for p in packages]
-    if name in ("framework-all", "framework-all-capy"):
+    if name in ("framework-all", "framework-all-capy", "framework-all-codex"):
         panels = [
             (op["packageId"], op["opId"], op["insertOrder"], op.get("insertionVerified"))
             for op in report.operationsApplied
@@ -417,12 +425,18 @@ def test_footer_drawers_successful_composition_matrix(tmp_path, name, packages) 
                 "hidden-context-panel-real-target",
                 "thinking-panel-real-target",
                 "rm-panel-real-target",
+                "codex-work-panel-real-target",
             }
         ]
         assert panels == [
             ("hidden-context-drawer", "hidden-context-panel-real-target", 100, True),
             ("thinking-drawer", "thinking-panel-real-target", 200, True),
             ("reminders-drawer", "rm-panel-real-target", 300, True),
+        ] if name != "framework-all-codex" else [
+            ("hidden-context-drawer", "hidden-context-panel-real-target", 100, True),
+            ("thinking-drawer", "thinking-panel-real-target", 200, True),
+            ("reminders-drawer", "rm-panel-real-target", 300, True),
+            ("codex-work-drawer", "codex-work-panel-real-target", 350, True),
         ]
     if name in ("framework-hidden-capy", "framework-all-capy"):
         capy_ops = {op["opId"] for op in report.operationsApplied if op["packageId"] == "capybara-onsen"}

@@ -40,7 +40,7 @@
                 "oldRangeLength": 193,
                 "replacement": {
                   "path": "payloads/01-real-target-helpers-and-overlay.js",
-                  "sha256": "03d38632120be1d75363e72619a3fc745bef74ba11817373e3cf5e4ea803d5ca"
+                  "sha256": "068057a11f05b711aa0823aed38f2bb799ec76c561a726abff9f2c7a795ed628"
                 },
                 "knownBehaviorChange": "Adds pure real-target drawer helper functions and composes drawer panels into the stock bottom overlay without a runtime registry."
               },
@@ -72,7 +72,7 @@
                 "oldRangeLength": 188,
                 "replacement": {
                   "path": "payloads/03-real-drawer-targets.js",
-                  "sha256": "400487724286c65789ee5f27da2e2300abf33f0fe4ccb40aa8a44f003f89f9d0"
+                  "sha256": "ffc30b94d140693e54b0fa598afc62c0bb44b07f557818c410cc113941100f9e"
                 },
                 "knownBehaviorChange": "Computes Hidden Context frame same-render and inserts hiddenContext/thinking/reminders as real footer targets before stock targets."
               },
@@ -86,7 +86,7 @@
                 "oldRangeLength": 104,
                 "replacement": {
                   "path": "payloads/04-real-drawer-selection-flags.js",
-                  "sha256": "d8aa0fd4e2eabad2768e6bc8642c870583354638e90421ba559e8381961d9b6f"
+                  "sha256": "cb9649627a44f41b535f14ad0c813b62a2a73c0ffe7dbcf0ebcf043e15275977"
                 },
                 "knownBehaviorChange": "Adds real-target selected flags and mirrors selected/open state for drawer panels."
               },
@@ -142,7 +142,7 @@
                 "oldRangeLength": 14,
                 "replacement": {
                   "path": "payloads/08-status-real-drawer-selection-hooks.js",
-                  "sha256": "6fd0a2d5d1e960fe2e4b19c9b927c6a7d04df5e111c339550ceceef9b03785dd"
+                  "sha256": "06e43778e1ed71bf597b5a7cc0dab0dbe41bc262ceb754596302814abc747179"
                 },
                 "knownBehaviorChange": "Reads status-bar selected state from real footer target ids."
               },
@@ -156,7 +156,7 @@
                 "oldRangeLength": 89,
                 "replacement": {
                   "path": "payloads/09-status-real-drawer-bars.js",
-                  "sha256": "8643d273690204451ce8966f7d76d783a7200dd7545477673e7519749b72c6bf"
+                  "sha256": "73e87dab31d6dc6b10993296079c29b1be378880cc57809735842efcc184cb4f"
                 },
                 "knownBehaviorChange": "Computes explicit Hidden Context, Thinking, and Reminders bar segments."
               },
@@ -248,12 +248,22 @@
           {
             "type": "module_must_contain",
             "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "FDcWs?.visible&&\"codexWork\""
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__CODEX_CODEX_WORK_DRAWER_SELECTED_V1__"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
             "value": "space:\"footer:openSelected\""
           },
           {
             "type": "module_must_contain",
             "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
-            "value": "FDdrawerBars=[FDhBar,FDtBar,FDrBar].filter(Boolean)"
+            "value": "FDdrawerBars=[FDhBar,FDtBar,FDcBar,FDrBar].filter(Boolean)"
           }
         ],
         "manualSmoke": {
