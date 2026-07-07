@@ -77,7 +77,7 @@
                 "insertOrder": 400,
                 "replacement": {
                   "path": "payloads/03-md-link-preview-panel.js",
-                  "sha256": "071807d1c1dcaa74242dda4c5faa08b2530c6066d100f04de39b920920dd8cc0"
+                  "sha256": "59b094b408b302e91272156fc1f4174eb8190d525a1b0052f4cf812450841a43"
                 },
                 "knownBehaviorChange": "Adds the rendered panel and local footer-key handlers for markdown previews."
               }

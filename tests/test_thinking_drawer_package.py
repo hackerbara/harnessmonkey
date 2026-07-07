@@ -262,6 +262,33 @@ def test_helper_fixture_merge_and_actual_text_only_sources() -> None:
 
 
 
+def test_thinking_live_deltas_keep_one_stable_card_and_scroll_anchor() -> None:
+    helper = read_rel("payloads/01-thinking-text-helpers.js")
+    drawer = (ROOT / "packages" / "drawer-dock" / "payloads" / "01-real-target-helpers-and-overlay.js").read_text(encoding="utf-8")
+    script = textwrap.dedent(
+        f"""
+        {drawer}
+        {helper}
+        globalThis.__CODEX_THINKING_TEXT_DRAWER_FRAME_V1__ = undefined;
+        globalThis.__CODEX_THINKING_TEXT_DRAWER_VIEWPORT_V1__ = 8;
+        __codexTTDRecordLiveThinking({{text:'a', streamKey:'s1', turnKey:'turn'}});
+        let frame = __codexTTDDrawerFrame();
+        const key = frame.blocks[0].key;
+        globalThis.__CODEX_THINKING_TEXT_DRAWER_SCROLL_V1__ = {{cardIndex:0, innerOffset:0, key}};
+        __codexTTDRecordLiveThinking({{text:'bc', streamKey:'s1', turnKey:'turn'}});
+        __codexTTDRecordLiveThinking({{text:'def', streamKey:'s1', turnKey:'turn'}});
+        frame = __codexTTDDrawerFrame();
+        if (frame.blocks.length !== 1) throw new Error(`blocks ${{frame.blocks.length}}`);
+        if (frame.blocks[0].key !== key) throw new Error(`key changed ${{frame.blocks[0].key}} vs ${{key}}`);
+        if (!frame.blocks[0].bodyLines.join("\\n").includes('abcdef')) throw new Error(frame.blocks[0].bodyLines.join("\\n"));
+        if (frame.scroll.key !== key || frame.scroll.cardIndex !== 0) throw new Error(JSON.stringify(frame.scroll));
+        console.log(JSON.stringify({{ok:true, key}}));
+        """
+    )
+    result = subprocess.run(["node", "-e", script], text=True, capture_output=True, check=True)
+    assert json.loads(result.stdout)["ok"] is True
+
+
 def test_thinking_text_drawer_panel_uses_shared_boxed_drawer_renderer() -> None:
     panel = read_rel("payloads/17-panel-real-target.js")
     helpers = read_rel("payloads/01-thinking-text-helpers.js")
@@ -293,7 +320,8 @@ def test_helper_fixture_exposes_box_blocks_for_rendering() -> None:
         assert(frame.blocks.length === 2, 'two thinking entries should produce two boxes');
         assert(frame.blocks.every(b => Array.isArray(b.bodyLines)), 'blocks should carry body lines');
         assert(frame.blocks.every(b => b.header && b.key), 'blocks should carry stable key and header');
-        assert(frame.lineCount >= frame.blocks.reduce((n, b) => n + b.bodyLines.length + 3, 0), 'lineCount should include box border/header overhead');
+        assert(frame.cardCount === frame.blocks.length, 'cardCount should track shared card blocks');
+        assert(frame.lineCount === frame.cardCount, 'lineCount should no longer be flattened block rows');
         assert(frame.blocks[0].bodyLines.length === 1, 'chunked body should normalize wrapped text lines');
         """
     )
@@ -322,7 +350,8 @@ def test_operations_stay_out_of_request_and_persistence_surfaces() -> None:
 
 def test_helper_fixture_review_regressions() -> None:
     helper = read_rel("payloads/01-thinking-text-helpers.js")
-    helper_prefix = helper
+    drawer = (ROOT / "packages" / "drawer-dock" / "payloads" / "01-real-target-helpers-and-overlay.js").read_text(encoding="utf-8")
+    helper_prefix = drawer + "\n" + helper
     script = textwrap.dedent(
         f"""
         {helper_prefix}
@@ -394,34 +423,31 @@ def test_helper_fixture_review_regressions() -> None:
         globalThis.__CODEX_THINKING_TEXT_DRAWER_OPEN_V1__ = true;
         __codexTTDMarkRead();
         assert(__codexTTDDrawerFrame().unread === false, 'opening drawer should clear unread');
-        __codexTTDClampScroll(999, __codexTTDDrawerFrame().lineCount, globalThis.__CODEX_THINKING_TEXT_DRAWER_VIEWPORT_V1__);
-        frame = __codexTTDDrawerFrame();
-        assert(frame.scroll <= Math.max(0, frame.lineCount - 18), 'scroll should clamp to available content');
-        const maxViewport4 = Math.max(0, frame.lineCount - 4);
-        __codexTTDClampScroll(999, frame.lineCount, 4);
-        frame = __codexTTDDrawerFrame();
-        assert(frame.scroll === maxViewport4, 'frame refresh should preserve supplied drawer viewport bottom');
         globalThis.__CODEX_THINKING_TEXT_DRAWER_VIEWPORT_V1__ = 4;
         frame = __codexTTDDrawerFrame();
-        assert(frame.scroll === maxViewport4, 'frame refresh with stored viewport should not reclamp to default height');
-        __codexTTDClampScroll(0, frame.lineCount, 4);
-        __codexTTDClampScroll(999, frame.lineCount, globalThis.__CODEX_THINKING_TEXT_DRAWER_VIEWPORT_V1__);
+        const selectedKey = frame.blocks[0].key;
+        __codexTTDSetScroll({{cardIndex:0, innerOffset:999, key:selectedKey}});
         frame = __codexTTDDrawerFrame();
-        assert(frame.scroll === maxViewport4, 'footer down should honor stored viewport height');
+        assert(frame.scroll.key === selectedKey, 'scroll should preserve selected card key');
+        assert(frame.scroll.innerOffset === __codexFDMaxInnerOffset(frame.blocks[0], 4), 'scroll should clamp to selected card bottom');
 
         globalThis.__CODEX_THINKING_TEXT_DRAWER_FRAME_V1__ = undefined;
         globalThis.__CODEX_THINKING_TEXT_DRAWER_VIEWPORT_V1__ = 4;
         __codexTTDRecordStructuredThinking({{thinking:Array.from({{length:95}}, (_, i) => 'base line ' + i).join('\\n'), messageId:'scroll-base', blockHash:'scroll-base'}});
         frame = __codexTTDDrawerFrame();
-        __codexTTDClampScroll(999, frame.lineCount, 4);
+        const growKey = frame.blocks[0].key;
+        __codexTTDSetScroll({{cardIndex:0, innerOffset:999, key:growKey}});
         frame = __codexTTDDrawerFrame();
-        assert(frame.scroll === Math.max(0, frame.lineCount - 4), 'setup should reach dynamic bottom');
+        const oldBottom = frame.scroll.innerOffset;
+        assert(oldBottom === __codexFDMaxInnerOffset(frame.blocks[0], 4), 'setup should reach dynamic card bottom');
         __codexTTDRecordStructuredThinking({{thinking:Array.from({{length:100}}, (_, i) => 'updated line ' + i).join('\\n'), messageId:'scroll-base', blockHash:'scroll-base'}});
         frame = __codexTTDDrawerFrame();
-        assert(frame.scroll === Math.max(0, frame.lineCount - 4), 'structured update at dynamic bottom should stay at dynamic bottom');
-        __codexTTDRecordStructuredThinking({{thinking:Array.from({{length:12}}, (_, i) => 'new line ' + i).join('\\n'), messageId:'scroll-new', blockHash:'scroll-new'}});
+        assert(frame.scroll.key === growKey, 'structured update should keep card key');
+        assert(frame.scroll.innerOffset === __codexFDMaxInnerOffset(frame.blocks[0], 4), 'structured update at card bottom should stay at card bottom');
+        __codexTTDSetScroll({{cardIndex:0, innerOffset:2, key:growKey}});
+        __codexTTDRecordStructuredThinking({{thinking:Array.from({{length:105}}, (_, i) => 'middle line ' + i).join('\\n'), messageId:'scroll-base', blockHash:'scroll-base'}});
         frame = __codexTTDDrawerFrame();
-        assert(frame.scroll === Math.max(0, frame.lineCount - 4), 'new entry at dynamic bottom should stay at dynamic bottom');
+        assert(frame.scroll.key === growKey && frame.scroll.innerOffset === 2, 'mid-card reading should preserve inner offset');
         globalThis.__CODEX_THINKING_TEXT_DRAWER_OPEN_V1__ = false;
         assert(__codexTTDIsOpen() === false, 'framework helper should report closed Thinking');
         """

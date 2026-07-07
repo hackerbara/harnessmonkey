@@ -247,7 +247,7 @@ def test_markdown_preview_panel_uses_footer_drawer_primitives_and_local_keys() -
 def test_footer_drawers_overlay_optionally_mounts_markdown_preview_panel() -> None:
     payload = (FOOTER / "payloads" / "01-real-target-helpers-and-overlay.js").read_text(encoding="utf-8")
     assert 'typeof __codexMDLPPanel==="function"?Xd.jsx(__codexMDLPPanel,{})' in payload
-    assert "children:[n,r,o,s,t]" in payload
+    assert "children:[n,r,s,o,i,t]" in payload
 
 
 def test_markdown_preview_frame_uses_flat_lines_not_entry_blocks() -> None:

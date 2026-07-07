@@ -48,7 +48,7 @@
                 "type": "insert_before",
                 "replacement": {
                   "path": "payloads/01-thinking-text-helpers.js",
-                  "sha256": "776f0bcada64fa71afc77e3e504abb3879c72354accd8ea2b23f7d9a744a456e"
+                  "sha256": "547fe725287c1a596477441435d5289f0f35eef859170184d7b3c82958030d19"
                 },
                 "knownBehaviorChange": "Adds display-only Thinking collectors and helpers before the stock hidden attachment filter without claiming the Ypr byte span.",
                 "anchor": "function Ypr(e){",
@@ -159,7 +159,7 @@
                 "type": "insert_before",
                 "replacement": {
                   "path": "payloads/17-panel-real-target.js",
-                  "sha256": "fa296b0884bcffae6f2ebf8c0b2ec44e7027005dec790e05a840dbfd1948ab9a"
+                  "sha256": "d04f90525e98e2f5e46176aa69af18b1864885a19acc4e8bc1a57daba63778f0"
                 },
                 "knownBehaviorChange": "Renders Thinking only when the real thinking target is selected and locally open.",
                 "anchor": "var MXe,A_,Xd,GKo=2,pmr;",

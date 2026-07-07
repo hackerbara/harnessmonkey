@@ -46,7 +46,7 @@
                 "insertOrder": 300,
                 "replacement": {
                   "path": "payloads/01-codex-work-helpers.js",
-                  "sha256": "7bfcb3ef73dde68f50c9215ed698457c664f6ab7037a960e9713981249b34fc4"
+                  "sha256": "612e54f263fe6e86744af66e066b909cd6ef3262132634b07a29033280837999"
                 },
                 "knownBehaviorChange": "Adds display-only helpers that read local Codex companion job state and Codex session JSONL."
               },
@@ -59,7 +59,7 @@
                 "insertOrder": 350,
                 "replacement": {
                   "path": "payloads/17-panel-real-target.js",
-                  "sha256": "500159e964db08709eab574ff07308a00c7a595b60427f3cdd4768886402ed10"
+                  "sha256": "88e20604d2415c14484aafe6ebf3934511521776c4a3957333c04faf0621f248"
                 },
                 "knownBehaviorChange": "Renders Codex Work only when the real codexWork target is selected and locally open."
               }

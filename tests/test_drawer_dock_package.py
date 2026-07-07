@@ -190,6 +190,7 @@ def test_footer_drawers_action_wrapper_routes_by_real_selected_target() -> None:
     assert 't==="thinking"' in text
     assert 't==="reminders"&&typeof __codexRMWrapActions==="function"' in text
     assert 't==="codexWork"' in text
+    assert "__codexFDKeyScroll" in text
     assert 'typeof __codexCWDKey==="function"&&__codexCWDKey("up")' in text
     assert 'footer:clearSelection' in text
     assert 'footer:close' in text
@@ -198,7 +199,6 @@ def test_footer_drawers_action_wrapper_routes_by_real_selected_target() -> None:
     assert '"shift+g":"footer:jumpTop"' in bindings
     assert '__codexFDHiddenContextScroll(-3,r)' not in text
     assert '__codexFDHiddenContextScroll(3,r)' not in text
-    assert 'children:"  up/down or mouse wheel scroll | x closes"' in text
     assert 'openId' not in text
     assert 'hoverId' not in text
 
@@ -207,21 +207,65 @@ def test_footer_drawers_owns_shared_boxed_drawer_display_primitives() -> None:
     text = (FOOTER_DRAWERS / "payloads" / "01-real-target-helpers-and-overlay.js").read_text(encoding="utf-8")
     for name in [
         "__codexFDViewport",
-        "__codexFDClampScroll",
-        "__codexFDBlockLineCount",
-        "__codexFDVisibleBlocks",
-        "__codexFDRenderBlockList",
+        "__codexFDClampLineScroll",
+        "__codexFDNormalizeCardScroll",
+        "__codexFDCardRows",
+        "__codexFDMaxInnerOffset",
+        "__codexFDAdvanceCardScroll",
+        "__codexFDVisibleCards",
+        "__codexFDRenderCardList",
         "__codexFDVisibleLines",
         "__codexFDRenderLineList",
         "__codexFDRenderDrawerPanel",
+        "__codexFDKeyScroll",
     ]:
         assert f"function {name}" in text
+    assert "function __codexFDVisibleBlocks" not in text
+    assert "__codexFDBlocksLineCount" not in text
     assert 'borderStyle:"single"' in text
     assert 'borderStyle:"round"' in text
     assert 'top:g' in text
     assert 'onWheel' in text
     assert 'bodyLines' in text
     assert 'flatContent' in text
+    assert "innerOffset" in text
+    assert "key:" in text
+
+
+def test_footer_drawers_card_scroll_stays_inside_large_card_before_advancing() -> None:
+    helper = (FOOTER_DRAWERS / "payloads" / "01-real-target-helpers-and-overlay.js").read_text(encoding="utf-8")
+    script = f'''
+const Xd = {{
+  jsx: (type, props, key) => ({{type: typeof type === "function" ? type.name : type, props, key}}),
+  jsxs: (type, props, key) => ({{type: typeof type === "function" ? type.name : type, props, key}}),
+}};
+function B(props) {{ return props; }}
+function v(props) {{ return props; }}
+function Er() {{ return {{rows: 40}}; }}
+{helper}
+const frame = {{blocks:[
+  {{key:"a", header:"A", bodyLines:Array.from({{length:20}}, (_, i) => `a-${{i}}`)}},
+  {{key:"b", header:"B", bodyLines:["b-0"]}},
+]}};
+let s = __codexFDNormalizeCardScroll(frame, 0, 8);
+if (s.cardIndex !== 0 || s.innerOffset !== 0 || s.key !== "a") throw new Error(JSON.stringify(s));
+s = __codexFDAdvanceCardScroll(frame, s, 1, 8);
+if (s.cardIndex !== 0 || s.innerOffset <= 0) throw new Error("first down should scroll within card: "+JSON.stringify(s));
+for (let i = 0; i < 20; i++) s = __codexFDAdvanceCardScroll(frame, s, 1, 8);
+if (s.cardIndex !== 1 || s.innerOffset !== 0 || s.key !== "b") throw new Error("should advance to next card after card bottom: "+JSON.stringify(s));
+const last = __codexFDAdvanceCardScroll(frame, s, 1, 8);
+if (last.cardIndex !== 1 || last.innerOffset !== 0 || last.key !== "b") throw new Error("down at last card should stay put: "+JSON.stringify(last));
+s = __codexFDAdvanceCardScroll(frame, s, -1, 8);
+if (s.cardIndex !== 0 || s.innerOffset <= 0 || s.key !== "a") throw new Error("up from next card should return to previous card bottom: "+JSON.stringify(s));
+const top = __codexFDAdvanceCardScroll(frame, {{cardIndex:0, innerOffset:0, key:"a"}}, -1, 8);
+if (top.cardIndex !== 0 || top.innerOffset !== 0 || top.key !== "a") throw new Error("up at first card top should stay put: "+JSON.stringify(top));
+const visible = __codexFDVisibleCards(frame, {{cardIndex:0, innerOffset:3, key:"a"}}, 8);
+if (visible.length !== 1) throw new Error("large clipped card should occupy viewport");
+if (visible[0].bodyOffset !== 3) throw new Error("body offset not preserved");
+console.log(JSON.stringify({{ok:true}}));
+'''
+    result = subprocess.run(["node", "-e", script], text=True, capture_output=True, check=True)
+    assert json.loads(result.stdout)["ok"] is True
 
 
 def test_footer_drawers_overlay_optionally_mounts_markdown_preview_panel() -> None:

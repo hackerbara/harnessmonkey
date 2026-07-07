@@ -39,7 +39,7 @@
                 "insertOrder": 100,
                 "replacement": {
                   "path": "payloads/01-projection-helpers-before-ypr-2.1.201.js",
-                  "sha256": "01c9ceee668b103dad33697b28c7b61a413bdfca727cf06edb5775d88f973db8"
+                  "sha256": "eb1fed162e32748932ff89cdee97e73d3d091b67549098442ebad31ddf9eba0f"
                 },
                 "knownBehaviorChange": "Publishes full projection-list drawer frame before hidden-context filtering without framework registry mutation."
               },

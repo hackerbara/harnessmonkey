@@ -113,6 +113,14 @@ def test_codex_work_package_surface_is_public_not_spike_only() -> None:
     assert "codex-work-drawer" in root_readme
 
 
+def test_codex_work_panel_delegates_to_shared_drawer_renderer() -> None:
+    panel = read_rel("payloads/17-panel-real-target.js")
+    assert "__codexFDRenderDrawerPanel" in panel
+    assert "__codexCWDRenderCard" not in panel
+    assert "__codexCWDRenderPanel" not in panel
+    assert "onOmittedClick:e=>__codexCWDClickOmitted(e,t)" in panel
+
+
 def test_codex_work_operations_resolve_once_in_2_1_201_source() -> None:
     source = source_module_text()
     assert source is not None
@@ -155,13 +163,13 @@ fs.writeFileSync(path.join(sessionDir, `rollout-demo-${{threadId}}.jsonl`), [
 {helper}
 let frame = __codexCWDFrame();
 if (frame.cardCount !== 1) throw new Error(`card count ${{frame.cardCount}}`);
-let card = frame.cards[0];
+let card = frame.blocks[0];
 if (card.kind !== "assistant") throw new Error(card.kind);
 if (card.bodyLines.length !== 13) throw new Error(`collapsed lines ${{card.bodyLines.length}}`);
 if (!card.bodyLines.at(-1).includes("click to expand")) throw new Error(card.bodyLines.at(-1));
 __codexCWDToggleExpanded(card.expandKey);
 frame = __codexCWDFrame();
-card = frame.cards[0];
+card = frame.blocks[0];
 if (!card.expanded) throw new Error("not expanded");
 if (card.bodyLines.length !== 15) throw new Error(`expanded lines ${{card.bodyLines.length}}`);
 console.log(JSON.stringify({{ok:true, title:card.title, lines:card.bodyLines.length}}));

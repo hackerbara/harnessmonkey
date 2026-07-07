@@ -103,7 +103,8 @@ def test_hidden_context_frame_exposes_shared_render_blocks() -> None:
         assert(frame.blocks[0].header.includes('PostToolUse hook'), 'block header should preserve hidden context label');
         assert(frame.blocks[0].header.includes('attachment:hook_additional_context'), 'block header should preserve source label');
         assert(frame.blocks[0].bodyLines.some(line => line.includes('first hidden line')), 'block body should contain projection text');
-        assert(frame.lineCount >= frame.blocks[0].bodyLines.length + 3, 'lineCount should include box border/header overhead');
+        assert(frame.cardCount === frame.blocks.length, 'cardCount should track shared card blocks');
+        assert(frame.blocks[0].key === 'row-1', 'stable card key should preserve attachment identity');
         """
     )
     subprocess.run(["node", "-e", script], check=True)
