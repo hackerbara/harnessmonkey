@@ -59,6 +59,7 @@ def test_capybara_onsen_manifest_shape_and_pins():
         "capy-onsen-fallback-window-v-2-1-201",
         "capy-onsen-assistant-text-hook-2-1-201",
         "capy-onsen-note-sink-after-dwc-2-1-201",
+        "capy-onsen-full-column-frame-ve-2-1-201",
     ]
     for op in operations:
         assert op["type"] == "replace_exact"
@@ -89,8 +90,12 @@ def test_capybara_onsen_payloads_match_hashes_and_are_mojibake_safe():
     assert "__coW=__coArtW-__coClipColsV7" in joined
     assert "function __coCropRunsV7" in joined
     assert "function __coRightWidthV6" in joined
-    assert "codex-capy-onsen-v6-right-responsive" in joined
-    assert "codex-capy-onsen-v6-pool-right-responsive" in joined
+    assert "codex-capy-onsen-v8-frame" in joined
+    assert "codex-capy-onsen-v8-left" in joined
+    assert "codex-capy-onsen-v8-center" in joined
+    assert "codex-capy-onsen-v8-right" in joined
+    assert 'height:"100%"' in joined
+    assert 'justifyContent:"flex-end"' in joined
     assert "codex-capy-onsen-v5-width-readout" not in joined
     assert "a=n!==void 0||r!==void 0,l=a?Xd.jsx(t4,{value:i,children:o}):o" in joined
     assert '"ink-raw-ansi"' in joined
@@ -145,9 +150,38 @@ def test_capybara_onsen_footer_drawer_overlays_are_not_clipped_or_fake_modal():
     assert "a=n!==void 0||r!==void 0,l=a?Xd.jsx(t4,{value:i,children:o}):o" in joined
 
     start = joined.index("function __CodexCapyOnsenBottomStackV4")
-    end = joined.index("function __CodexCapyOnsenModalProviderV4")
+    end = joined.index("function __CodexCapyOnsenFrameV8")
     bottom_stack_helper = joined[start:end]
     assert 'overflow:"hidden"' not in bottom_stack_helper
+
+
+def test_capybara_onsen_bottom_stack_does_not_own_side_art_layout():
+    """Regression guard for bottom art inflating the prompt/footer row.
+
+    The ClaudeMonkey capybara regression came from putting side `ink-raw-ansi`
+    pool art directly in the bottom-stack flex row. HarnessMonkey's newer
+    full-column frame keeps the bottom stack center-only; the side art lives in
+    one full-height frame around main+bottom+modal, so it reaches the terminal
+    bottom without contributing height to the prompt/footer row.
+    """
+    joined = _joined_payload_text()
+
+    bottom_start = joined.index("function __CodexCapyOnsenBottomStackV4")
+    bottom_end = joined.index("function __CodexCapyOnsenFrameV8")
+    bottom_stack_helper = joined[bottom_start:bottom_end]
+    assert "__coPoolL" not in bottom_stack_helper
+    assert "__coPoolR" not in bottom_stack_helper
+    assert '"ink-raw-ansi"' not in bottom_stack_helper
+    assert "codex-capy-onsen-v4-bottom-provider" in bottom_stack_helper
+
+    frame_start = joined.index("function __CodexCapyOnsenFrameV8")
+    frame_end = joined.index("function __CodexCapyOnsenModalProviderV4")
+    frame_helper = joined[frame_start:frame_end]
+    assert '"100%","codex-capy-onsen-v8-left"' in frame_helper
+    assert '"100%","codex-capy-onsen-v8-right"' in frame_helper
+    assert 'children:[e,t,n]' in frame_helper
+    assert "codex-capy-onsen-v8-left" in frame_helper
+    assert "codex-capy-onsen-v8-right" in frame_helper
 
 
 def test_capybara_onsen_validates_against_live_2_1_201_source():
