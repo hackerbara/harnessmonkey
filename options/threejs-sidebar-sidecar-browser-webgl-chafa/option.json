@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "kind": "option",
-  "id": "threejs-sidebar-sidecar-local",
-  "label": "Three.js Sidebar Sidecar Native WebGPU Runtime",
-  "description": "Enables the home-installed native Node WebGPU three.js sidecar renderer for the threejs-sidebar-sidecar patch.",
+  "id": "threejs-sidebar-sidecar-browser-webgl-chafa",
+  "label": "Three.js Sidebar Browser WebGL + Chafa Runtime",
+  "description": "Enables the browser-backed WebGL sidecar with Chafa ANSI encoding, the high-fidelity 30fps renderer profile for threejs-sidebar-sidecar.",
   "requiresPackages": [
     "threejs-sidebar-sidecar"
   ],
@@ -15,29 +15,37 @@
         "allowOverrideProcessEnv": true
       },
       "CLAUDEMONKEY_THREE_SIDECAR": {
-        "value": "~/.harnessmonkey/patches/threejs-sidebar-sidecar/sidecar/run-sidecar.js",
+        "value": "~/.harnessmonkey/patches/threejs-sidebar-sidecar/sidecar/browser-webgl/run-sidecar-browser-webgl.sh",
         "allowOverrideProcessEnv": true
       },
       "CLAUDEMONKEY_THREE_SIDECAR_RENDERER": {
-        "value": "webgpu",
+        "value": "browser-webgl",
         "allowOverrideProcessEnv": true
       },
       "CLAUDEMONKEY_THREE_SIDECAR_SCENE": {
-        "value": "orbit-lab",
+        "value": "browser-orbit-lab",
         "allowOverrideProcessEnv": true
       },
       "CLAUDEMONKEY_THREE_SIDECAR_ANSI": {
-        "value": "braille",
+        "value": "chafa-vhalf",
         "allowOverrideProcessEnv": true
       },
       "CLAUDEMONKEY_THREE_SIDECAR_FPS": {
-        "value": "8",
+        "value": "30",
+        "allowOverrideProcessEnv": true
+      },
+      "THREE_SIDECAR_CHAFA_BIN": {
+        "value": "/opt/homebrew/bin/chafa",
+        "allowOverrideProcessEnv": true
+      },
+      "THREE_SIDECAR_BROWSER_WEBGL_WINDOW_MODE": {
+        "value": "offscreen",
         "allowOverrideProcessEnv": true
       }
     },
     "conflictsWithArgv": [],
     "conflictsWithOptions": [
-      "threejs-sidebar-sidecar-browser-webgl-chafa",
+      "threejs-sidebar-sidecar-local",
       "capybara-onsen-threejs-sidecar"
     ],
     "conflictsWithEnv": []

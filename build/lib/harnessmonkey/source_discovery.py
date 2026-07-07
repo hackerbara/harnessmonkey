@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -138,6 +139,59 @@ def recorded_source_path(paths: StatePaths) -> Path | None:
     return Path(source).expanduser().resolve(strict=False)
 
 
+def _read_install_record(paths: StatePaths) -> dict | None:
+    try:
+        raw = json.loads((paths.state_dir / "install-record.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(raw, dict) or raw.get("owner") != OWNER_MARKER:
+        return None
+    return raw
+
+
+def _sha256_file(path: Path) -> str | None:
+    try:
+        digest = hashlib.sha256()
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+    except OSError:
+        return None
+
+
+def recorded_cached_source_path(paths: StatePaths) -> Path | None:
+    """The verified source cache captured by install-shim, if any.
+
+    The install record's `sourcePath` is useful provenance, but the
+    digest-keyed cache is the durable build source: it survives PATH becoming
+    the managed shim and survives the original install target changing or
+    disappearing. As with install.py's read side, the cache must stay inside
+    this state directory's own `sources/` tree and match the recorded sha.
+    """
+    record = _read_install_record(paths)
+    if record is None:
+        return None
+    cache_raw = record.get("previousSourceCachePath")
+    expected_sha = record.get("previousSourceSha256")
+    if not isinstance(cache_raw, str) or not isinstance(expected_sha, str):
+        return None
+    try:
+        cache_path = Path(cache_raw).expanduser().resolve(strict=True)
+    except (OSError, RuntimeError):
+        return None
+    sources_root = (paths.state_dir / "sources").resolve(strict=False)
+    try:
+        cache_path.relative_to(sources_root)
+    except ValueError:
+        return None
+    if not is_executable_file(cache_path):
+        return None
+    if _sha256_file(cache_path) != expected_sha:
+        return None
+    return cache_path
+
+
 def source_identity(path: str | Path | None, paths: StatePaths, kind: str) -> SourceIdentity | None:
     if _is_current_launcher_path(path, paths):
         return None
@@ -155,6 +209,8 @@ def discover_official_claude(
     paths: StatePaths,
     environ: Mapping[str, str] | None = None,
     which: Callable[[str], str | None] | None = None,
+    *,
+    include_install_record: bool = True,
 ) -> Path | None:
     environ = os.environ if environ is None else environ
     which = shutil.which if which is None else which
@@ -164,6 +220,13 @@ def discover_official_claude(
         (environ.get("HARNESSMONKEY_SOURCE"), "env"),
         (which(claude_executable_name()), "path"),
     ]
+    if include_install_record:
+        candidates.extend(
+            [
+                (recorded_cached_source_path(paths), "install-record-cache"),
+                (recorded_source_path(paths), "install-record-source"),
+            ]
+        )
     if is_windows():
         candidates.extend((c, "install") for c in windows_claude_install_candidates(environ))
     for candidate, kind in candidates:

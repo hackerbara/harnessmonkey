@@ -3,8 +3,8 @@
   "kind": "patch",
   "id": "threejs-sidebar-sidecar",
   "label": "Three.js Sidebar Sidecar",
-  "description": "Experimental live three.js side gutter: a patched Ink raw-ANSI bridge spawns a package-local sidecar, now 80 columns wide and defaulting to a native WebGPU braille-ANSI orbit-lab scene.",
-  "packageVersion": "0.4.1-local-sidecar-option",
+  "description": "Experimental live three.js side-gutter infrastructure with native WebGPU, browser WebGL + Chafa, and optional two-sided frame-pair layout support.",
+  "packageVersion": "0.6.0-browser-webgl-two-side",
   "compatibility": {
     "claudeVersions": [
       "2.1.201"
@@ -42,9 +42,9 @@
                 "oldRangeLength": 31,
                 "replacement": {
                   "path": "payloads/01-threejs-sidebar-helpers-before-vko-2-1-201.js",
-                  "sha256": "44eeeba3a7c02628d524e2f6a9bdc8240769db6fca7048059ea46f775d5313ed"
+                  "sha256": "0e3a72d53233ab4cc43718a1cce8fe2d41c66398734ed6aff0e66607d6de694f"
                 },
-                "knownBehaviorChange": "Defines an 80-column side gutter, sidecar process lifecycle, ANSI frame validation, fallback art, and center-column fde/useTerminalSize provider."
+                "knownBehaviorChange": "Defines sidecar lifecycle, ANSI frame validation, single-left and two-sided layout helpers, frame-pair handling, runtime config, and center-column fde/useTerminalSize provider."
               },
               {
                 "opId": "threejs-sidebar-center-columns-a-2-1-201",
@@ -106,9 +106,9 @@
                 "oldRangeLength": 364,
                 "replacement": {
                   "path": "payloads/05-threejs-sidebar-fullscreen-modal-center-fe-2-1-201.js",
-                  "sha256": "1256fe974df75c4e91b35f5e386830458299692e41b1a14abf7f38b6ccdcbfe9"
+                  "sha256": "67fbe67832826acd5fa33abdc2398bcfff423bbe00e24aba0b3ec57cc76e76c4"
                 },
-                "knownBehaviorChange": "Keeps modal/sub-agent style overlays out of the live side gutter."
+                "knownBehaviorChange": "Keeps modal/sub-agent overlays in the center column for both left-gutter and two-sided layouts."
               },
               {
                 "opId": "threejs-sidebar-qde-bottom-stack-ee-2-1-201",
@@ -138,9 +138,9 @@
                 "oldRangeLength": 165,
                 "replacement": {
                   "path": "payloads/07-threejs-sidebar-qde-overlay-center-te-2-1-201.js",
-                  "sha256": "532262495f8f50233954d2be55492eb8414641929baf2124c7f8b8c3c32b77a1"
+                  "sha256": "f8f4cd1eb230763eedd86b0ef4555677ac7facae844da5670d418a71062c632a"
                 },
-                "knownBehaviorChange": "Keeps overlay contents out of the live side gutter in the terminal-scroll-region path."
+                "knownBehaviorChange": "Keeps overlay contents in the center column in the terminal-scroll-region path for both left-gutter and two-sided layouts."
               },
               {
                 "opId": "threejs-sidebar-fallback-window-v-2-1-201",
@@ -157,6 +157,118 @@
                   "sha256": "41692b7d05af542795a43d95b528374ba0364377b3c21c7bfbd634abe5929000"
                 },
                 "knownBehaviorChange": "Uses the same physical/contextual frame in the non-fullscreen fallback path."
+              },
+              {
+                "opId": "threejs-sidebar-style-cell-bits-2-1-201",
+                "label": "Double terminal style-id capacity by borrowing one hyperlink-id bit",
+                "type": "replace_exact",
+                "exact": "f5e=17,kut=2,R3t=32767",
+                "requireWithinRange": [
+                  "f5e=17,kut=2,R3t=32767"
+                ],
+                "oldRangeSha256": "91792505adedc48b8791bcddbff2d3fabfed856b8f9ba2c557fd2fd0f17694a3",
+                "oldRangeLength": 22,
+                "replacement": {
+                  "path": "payloads/09-threejs-sidebar-style-cell-bits-2-1-201.js",
+                  "sha256": "dd80423ddfd7f9639c4d3bc46fc7d6d556643326d0c7fa02476eefbe5d4cb91f"
+                },
+                "knownBehaviorChange": "Changes packed-cell bit layout from 15 style bits / 15 hyperlink bits to 16 style bits / 14 hyperlink bits, allowing 65,535 style IDs while capping hyperlink IDs at 16,383."
+              },
+              {
+                "opId": "threejs-sidebar-stylepool-cap-2-1-201",
+                "label": "Use the full style-id field for StylePool capacity",
+                "type": "replace_exact",
+                "exact": "Koo=krp>>>1",
+                "requireWithinRange": [
+                  "Koo=krp>>>1"
+                ],
+                "oldRangeSha256": "cd4232b0fcd56355f3be3ea67806a4e1eee773f8be432850b5d7a8b2c5da9e97",
+                "oldRangeLength": 11,
+                "replacement": {
+                  "path": "payloads/10-threejs-sidebar-stylepool-cap-2-1-201.js",
+                  "sha256": "9b4848fcfcc08c96e05ba511bcbcc8934385b3a8265ec732da95132be415b222"
+                },
+                "knownBehaviorChange": "Raises the style pool from the old half-range cap to the full packed style-id range."
+              },
+              {
+                "opId": "threejs-sidebar-stylepool-intern-id-2-1-201",
+                "label": "Stop packing the unused style flag into the StylePool ID",
+                "type": "replace_exact",
+                "exact": "n=r<<1|(e.length>0&&wrp(e)?1:0)",
+                "requireWithinRange": [
+                  "n=r<<1|(e.length>0&&wrp(e)?1:0)"
+                ],
+                "oldRangeSha256": "92523490af650d5974e96dfc94c98f49e222022f4b23531fbd9aa21f77e2f325",
+                "oldRangeLength": 31,
+                "replacement": {
+                  "path": "payloads/11-threejs-sidebar-stylepool-intern-id-2-1-201.js",
+                  "sha256": "ca3e726d86bba88ae28ce6335e05ab71a2cbdeda3f5e964824c829dfda338177"
+                },
+                "knownBehaviorChange": "Stores the actual style index as the style ID so every ID can refer to a live style entry."
+              },
+              {
+                "opId": "threejs-sidebar-stylepool-get-2-1-201",
+                "label": "Read style entries by direct StylePool ID",
+                "type": "replace_exact",
+                "exact": "this.styles[e>>>1]??[]",
+                "requireWithinRange": [
+                  "this.styles[e>>>1]??[]"
+                ],
+                "oldRangeSha256": "0bbfe34094017d51233a550c195e49cf259112a4543ee2298ff2b6fd13c052f1",
+                "oldRangeLength": 22,
+                "replacement": {
+                  "path": "payloads/12-threejs-sidebar-stylepool-get-2-1-201.js",
+                  "sha256": "031270307c82011ba278f5fd701c3c20f4ebae1a7d11fceb546f8e14dba14645"
+                },
+                "knownBehaviorChange": "Matches style lookup to the direct style ID representation."
+              },
+              {
+                "opId": "threejs-sidebar-stylepool-attrs-2-1-201",
+                "label": "Apply compacted style IDs without shifting away a flag bit",
+                "type": "replace_exact",
+                "exact": "let r=n>>>1,o=t[r];",
+                "requireWithinRange": [
+                  "let r=n>>>1,o=t[r];"
+                ],
+                "oldRangeSha256": "6442ba16b06d61589e79df7594790935e0c72d3ac926ed402d56020d2f77de06",
+                "oldRangeLength": 19,
+                "replacement": {
+                  "path": "payloads/13-threejs-sidebar-stylepool-attrs-2-1-201.js",
+                  "sha256": "728bb06a659d6c22b7cc2310c27864ce04e5165803aa4bdf079c1b31d64acb64"
+                },
+                "knownBehaviorChange": "Matches StylePool compaction remapping to the direct style ID representation."
+              },
+              {
+                "opId": "threejs-sidebar-stylepool-compact-gate-2-1-201",
+                "label": "Compact StylePool aggressively for high-FPS truecolor sidecar frames",
+                "type": "replace_exact",
+                "exact": "if(t<=30000)return;if(t<=300000&&!this.stylePool.needsCompaction(this.lastStyleLiveSize))return;",
+                "requireWithinRange": [
+                  "if(t<=30000)return;if(t<=300000&&!this.stylePool.needsCompaction(this.lastStyleLiveSize))return;"
+                ],
+                "oldRangeSha256": "097efc91cf8b5bd778f52e02a15799d7d188f73cee04b72393c31bd55d81c6d7",
+                "oldRangeLength": 96,
+                "replacement": {
+                  "path": "payloads/14-threejs-sidebar-stylepool-compact-gate-2-1-201.js",
+                  "sha256": "19bd392d67892e0eadf4583f584e83f4a5ca442e2b0762669079d92ef5c4008a"
+                },
+                "knownBehaviorChange": "Lets the terminal renderer compact style IDs after roughly ten 30fps frames instead of waiting 30 seconds, preventing Chafa truecolor frame churn from exhausting StylePool."
+              },
+              {
+                "opId": "threejs-sidebar-full-column-frame-ve-2-1-201",
+                "label": "Wrap the fullscreen app shell in the optional two-sided three.js frame",
+                "type": "replace_exact",
+                "exact": "ve=Xd.jsxs(NKo,{children:[me,de,fe]})",
+                "requireWithinRange": [
+                  "children:[me,de,fe]"
+                ],
+                "oldRangeSha256": "ed6e766901019f3f90eccbfa537054df28ff0106c1c419c9d5370455d1b873e2",
+                "oldRangeLength": 37,
+                "replacement": {
+                  "path": "payloads/15-threejs-sidebar-full-column-frame-ve-2-1-201.js",
+                  "sha256": "d787aed1bb3d80eae818fe7c78d6d7926948cc83dfc44ade4cdbfa7d5c663036"
+                },
+                "knownBehaviorChange": "When CLAUDEMONKEY_THREE_SIDECAR_LAYOUT=two-side, renders one synchronized browser sidecar across both terminal gutters while the center column covers the wide middle gap; non-two-side behavior falls through to the existing left-gutter wrappers."
               }
             ]
           }
@@ -201,6 +313,41 @@
             "type": "module_must_contain",
             "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
             "value": "V=Xd.jsxs(Xd.Fragment,{children:[n,s,i]})"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "f5e=17,kut=2,R3t=32767"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "Koo=krp>>>1"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "n=r<<1|(e.length>0&&wrp(e)?1:0)"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "this.styles[e>>>1]??[]"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "let r=n>>>1,o=t[r];"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "if(t<=30000)return;if(t<=300000&&!this.stylePool.needsCompaction(this.lastStyleLiveSize))return;"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "ve=Xd.jsxs(NKo,{children:[me,de,fe]})"
           }
         ],
         "postconditions": [
@@ -323,6 +470,106 @@
             "type": "module_must_contain",
             "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
             "value": "\"--ansi\",cfg.ansi"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "Math.min(30,Number(env.CLAUDEMONKEY_THREE_SIDECAR_FPS)||8)"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "f5e=16,kut=2,R3t=16383"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "Koo=krp"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "n=r"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "this.styles[e]??[]"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "let r=n,o=t[r];"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "if(t<=333)return;if(t<=300000&&!this.stylePool.needsCompaction(this.lastStyleLiveSize))return;"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "Math.min(20,Number(env.CLAUDEMONKEY_THREE_SIDECAR_FPS)||8)"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "f5e=17,kut=2,R3t=32767"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "Koo=krp>>>1"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "n=r<<1|(e.length>0&&wrp(e)?1:0)"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "this.styles[e>>>1]??[]"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "let r=n>>>1,o=t[r];"
+          },
+          {
+            "type": "module_must_not_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "if(t<=30000)return;if(t<=300000&&!this.stylePool.needsCompaction(this.lastStyleLiveSize))return;"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "function __CodexThreeSidebarFrameV2"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "CLAUDEMONKEY_THREE_SIDECAR_LAYOUT"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "frame-pair"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "codex-threejs-sidebar-v2-frame"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "__tsModalLeftV2"
+          },
+          {
+            "type": "module_must_contain",
+            "modulePath": "/$bunfs/root/src/entrypoints/cli.js",
+            "value": "\"--layout\",\"two-side\""
           }
         ],
         "manualSmoke": {

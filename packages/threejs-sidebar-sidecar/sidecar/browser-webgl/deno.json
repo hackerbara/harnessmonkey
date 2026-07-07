@@ -1,0 +1,15 @@
+{
+  "name": "threejs-sidebar-browser-webgl-sidecar",
+  "version": "0.1.0",
+  "exports": "./main.ts",
+  "desktop": {
+    "app": {
+      "name": "ThreeJS Browser WebGL Sidecar",
+      "identifier": "local.harnessmonkey.threejs-browser-webgl-sidecar"
+    },
+    "backend": "cef",
+    "output": {
+      "macos": "./dist/ThreeJsBrowserWebglSidecar.app"
+    }
+  }
+}

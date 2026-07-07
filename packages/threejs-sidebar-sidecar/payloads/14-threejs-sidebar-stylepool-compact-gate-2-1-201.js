@@ -1,0 +1,1 @@
+if(t<=333)return;if(t<=300000&&!this.stylePool.needsCompaction(this.lastStyleLiveSize))return;

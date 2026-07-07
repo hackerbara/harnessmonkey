@@ -21,7 +21,7 @@ function parseArgs(argv) {
   }
   out.width = clampInt(out.width, 8, 180, 80);
   out.height = clampInt(out.height, 6, 120, 32);
-  out.fps = clampInt(out.fps, 1, 20, 8);
+  out.fps = clampInt(out.fps, 1, 30, 8);
   out.frames = clampInt(out.frames, 0, 1000000, 0);
   if (!['webgpu', 'software', 'wireframe'].includes(out.renderer)) out.renderer = 'webgpu';
   if (!['braille', 'half'].includes(out.ansi)) out.ansi = 'braille';

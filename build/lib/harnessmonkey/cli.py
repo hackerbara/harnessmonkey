@@ -1547,6 +1547,10 @@ def _repo_packages_root() -> Path:
     return Path(__file__).resolve().parents[2] / "packages"
 
 
+def _repo_options_root() -> Path:
+    return Path(__file__).resolve().parents[2] / "options"
+
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
@@ -1563,33 +1567,46 @@ def _ensure_state_dirs(paths: StatePaths, config) -> None:
         save_config(paths.config_path, config)
 
 
-def _install_package_result(source: Path, paths: StatePaths) -> dict:
+def _install_package_result(source: Path, paths: StatePaths, kind: str = "patch") -> dict:
     # `install` is the repo -> state sync path: it must refresh packages whose
     # on-disk copy is stale (old schemaVersion, old pins, etc. from an earlier
     # dev install) rather than silently skipping them because the dest dir
     # already exists (BUG 1). `add_package(overwrite=True)` itself reports
     # installed/updated/unchanged per package; bare `add-patch` (handle_add_package)
     # keeps the default `overwrite=False` no-clobber behavior for manual adds.
-    return add_package(source, "patch", paths.state_dir, overwrite=True)
+    return add_package(source, kind, paths.state_dir, overwrite=True)
 
 
-def _repo_patch_package_dirs(packages_root: Path) -> list[Path]:
-    if not packages_root.exists():
+def _repo_kind_package_dirs(root: Path, manifest_name: str) -> list[Path]:
+    if not root.exists():
         return []
     return sorted(
         path
-        for path in packages_root.iterdir()
-        if path.is_dir() and (path / "patch.json").exists()
+        for path in root.iterdir()
+        if path.is_dir() and (path / manifest_name).exists()
     )
+
+
+def _repo_patch_package_dirs(packages_root: Path) -> list[Path]:
+    return _repo_kind_package_dirs(packages_root, "patch.json")
+
+
+def _repo_option_package_dirs(options_root: Path) -> list[Path]:
+    return _repo_kind_package_dirs(options_root, "option.json")
 
 
 def handle_install(args: argparse.Namespace, paths: StatePaths, config) -> int:
     _ensure_state_dirs(paths, config)
     packages: dict[str, dict] = {}
+    options: dict[str, dict] = {}
     ok = True
     for package_dir in _repo_patch_package_dirs(_repo_packages_root()):
         result = _install_package_result(package_dir, paths)
         packages[package_dir.name] = result
+        ok = ok and bool(result.get("ok"))
+    for option_dir in _repo_option_package_dirs(_repo_options_root()):
+        result = _install_package_result(option_dir, paths, "option")
+        options[option_dir.name] = result
         ok = ok and bool(result.get("ok"))
 
     launch_payload: dict[str, Any]
@@ -1662,6 +1679,7 @@ def handle_install(args: argparse.Namespace, paths: StatePaths, config) -> int:
         "summary": "installed HarnessMonkey manager" if ok else "HarnessMonkey install incomplete",
         "stateDir": str(paths.state_dir),
         "packages": packages,
+        "options": options,
         "launchAgent": launch_payload,
         "nextStep": "Menubar: click the monkey → Install to set up your shim",
     }
@@ -1671,6 +1689,9 @@ def handle_install(args: argparse.Namespace, paths: StatePaths, config) -> int:
         for package_id, result in packages.items():
             stream = sys.stdout if result.get("ok") else sys.stderr
             print(f"{package_id}: {result.get('summary')}", file=stream)
+        for option_id, result in options.items():
+            stream = sys.stdout if result.get("ok") else sys.stderr
+            print(f"{option_id}: {result.get('summary')}", file=stream)
         if launch_payload.get("skipped"):
             print("LaunchAgent skipped (--cli)")
         else:

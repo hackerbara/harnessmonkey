@@ -199,7 +199,11 @@ def select_launch_target(
 ) -> LaunchTarget | None:
     which = _which_from_env(process_env)
     official = (
-        discover_official_claude(config, paths, process_env, which) if prefer_official else None
+        discover_official_claude(
+            config, paths, process_env, which, include_install_record=False
+        )
+        if prefer_official
+        else None
     )
     if official is not None:
         return LaunchTarget(path=official, kind="official_fallback")
@@ -217,7 +221,9 @@ def select_launch_target(
         return LaunchTarget(path=current, kind="patched")
 
     if official is None:
-        official = discover_official_claude(config, paths, process_env, which)
+        official = discover_official_claude(
+            config, paths, process_env, which, include_install_record=False
+        )
     if official is not None:
         return LaunchTarget(path=official, kind="official_fallback")
 

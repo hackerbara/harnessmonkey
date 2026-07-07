@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "kind": "option",
+  "id": "capybara-onsen-threejs-sidecar",
+  "label": "Capybara Onsen Three.js Sidecar Profile",
+  "description": "Enables the capybara onsen three.js profile by requiring the generic threejs-sidebar-sidecar infrastructure and selecting the Deno WebGPU + Chafa two-sided Eidoverse scene.",
+  "requiresPackages": [
+    "threejs-sidebar-sidecar"
+  ],
+  "option": {
+    "argv": [],
+    "env": {
+      "CLAUDEMONKEY_THREE_SIDECAR_ENABLE": {
+        "value": "1",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR": {
+        "value": "~/.harnessmonkey/patches/threejs-sidebar-sidecar/sidecar/eidoverse-webgpu/run-eidoverse-scene-sidecar.sh",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_RENDERER": {
+        "value": "eidoverse-deno-webgpu",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_SCENE": {
+        "value": "eidoverse-capybara-onsen-wide",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_ANSI": {
+        "value": "chafa-vhalf",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_FPS": {
+        "value": "24",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_LAYOUT": {
+        "value": "two-side",
+        "allowOverrideProcessEnv": true
+      },
+      "THREE_SIDECAR_CHAFA_BIN": {
+        "value": "/opt/homebrew/bin/chafa",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_SIDE_WIDTH": {
+        "value": "50",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_RIGHT_BREAKPOINT": {
+        "value": "140",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_OUTER_CROP_COLUMNS": {
+        "value": "20",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_SOURCE_SIDE_COLUMNS": {
+        "value": "80",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_RENDER_COLUMNS": {
+        "value": "400",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_SOURCE_WIDTH": {
+        "value": "1280",
+        "allowOverrideProcessEnv": true
+      },
+      "CLAUDEMONKEY_THREE_SIDECAR_SOURCE_HEIGHT": {
+        "value": "720",
+        "allowOverrideProcessEnv": true
+      },
+      "THREE_SIDECAR_EIDOVERSE_ROOT": {
+        "value": "/Users/MAC/Documents/eidoverse-video",
+        "allowOverrideProcessEnv": true
+      },
+      "THREE_SIDECAR_EIDOVERSE_CONFIG": {
+        "value": "/Users/MAC/Documents/eidoverse-video/work/capybara-onsen-v2/wide-gap-scene.json",
+        "allowOverrideProcessEnv": true
+      }
+    },
+    "conflictsWithArgv": [],
+    "conflictsWithOptions": [
+      "threejs-sidebar-sidecar-local",
+      "threejs-sidebar-sidecar-browser-webgl-chafa"
+    ],
+    "conflictsWithEnv": []
+  }
+}
